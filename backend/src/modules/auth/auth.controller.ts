@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { loginSchema, registerSchema } from "./auth.schema.js";
+import { loginSchema, refreshTokenSchema, registerSchema } from "./auth.schema.js";
 import { authService } from "./auth.service.js";
 
 export async function register(
@@ -33,3 +33,58 @@ export async function login(
     data: result,
   });
 }
+
+
+export async function refresh(
+    req: Request,
+    res: Response,
+) {
+    const input = refreshTokenSchema.parse(req.body);
+
+    const result = await authService.refresh(input);
+
+    return res.status(200).json({
+        success: true,
+        data: result,
+    });
+}
+
+
+export async function logout(
+    req: Request,
+    res: Response,
+) {
+    const input = refreshTokenSchema.parse(req.body);
+
+    await authService.logout(input);
+
+    return res.status(204).send();
+}
+
+
+
+export async function logoutAll(
+    req: Request,
+    res: Response,
+) {
+    await authService.logoutAll(req.user!.id);
+
+    return res.status(204).send();
+}
+
+
+export async function getMe(
+    req: Request,
+    res: Response,
+) {
+    const user = await authService.getMe(req.user!.id);
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            user,
+        },
+    });
+}
+
+

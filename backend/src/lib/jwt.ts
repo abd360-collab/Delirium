@@ -10,6 +10,7 @@ type AccessTokenPayload = {
 
 type RefreshTokenPayload = {
     sub: string;
+    jti: string;
 };
 
 const accessTokenPayloadSchema = z.object({
@@ -19,6 +20,7 @@ const accessTokenPayloadSchema = z.object({
 
 const refreshTokenPayloadSchema = z.object({
     sub: z.string(),
+    jti: z.string(),
 });
 
 export function generateAccessToken(
@@ -73,4 +75,21 @@ export function verifyRefreshToken(
     );
 
     return refreshTokenPayloadSchema.parse(decoded);
+}
+
+
+export function getTokenExpiration(
+    token: string,
+): Date {
+    const decoded = jwt.decode(token);
+
+    if (
+        typeof decoded !== "object" ||
+        decoded === null ||
+        typeof decoded.exp !== "number"
+    ) {
+        throw new Error("Invalid JWT expiration");
+    }
+
+    return new Date(decoded.exp * 1000);
 }
