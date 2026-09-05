@@ -108,4 +108,19 @@ export const cartRepository = {
             },
         });
     },
+
+    findCartForCheckout(userId: string) {
+    return prisma.cart.findUnique({
+        where: {
+            userId,
+        },
+        include: {
+            items: {
+                include: {
+                    menuItem: true,
+                },
+            },
+        },
+    });
+},
 };
