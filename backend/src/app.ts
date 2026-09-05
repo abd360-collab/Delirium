@@ -21,11 +21,6 @@ app.get("/health", (req, res) => {
         message: "Server is healthy",
     });
 });
-
-app.get("/test-error", (_req, _res) => {
-  throw new Error("Testing error handling");
-});
-
 app.use("/api/v1", router);
 
 

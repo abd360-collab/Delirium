@@ -14,15 +14,16 @@ datasource db {
 
 
 model User {
-  id                  String           @id @default(uuid())
-  email               String           @unique
-  passwordHash        String
-  name                String
-  role                UserRole         @default(CUSTOMER)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         UserRole  @default(CUSTOMER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  sessions            Session[]
+  sessions     Session[]
+  cart         Cart?
 }
 
 enum UserRole {
@@ -44,6 +45,69 @@ model Session {
   user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+
+model Category {
+  id           String     @id @default(uuid())
+  name         String     @unique
+  description  String?
+  displayOrder Int
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  menuItems    MenuItem[]
+}
+
+
+
+model MenuItem {
+  id           String     @id @default(uuid())
+  categoryId   String
+  name         String
+  description  String?
+  priceInPaise Int
+  imageUrl     String?
+  isActive     Boolean    @default(true)
+  isAvailable  Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  cartItems    CartItem[]
+
+  @@unique([categoryId, name])
+  @@index([categoryId])
+}
+
+model Cart {
+    id        String     @id @default(uuid())
+    userId    String     @unique
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    items     CartItem[]
+}
+
+
+model CartItem {
+    id         String   @id @default(uuid())
+    cartId     String
+    menuItemId String
+    quantity   Int
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+    menuItem   MenuItem @relation( fields: [menuItemId], references: [id], onDelete: Restrict)
+
+    @@unique([cartId, menuItemId])
+    @@index([cartId])
 }
 
 

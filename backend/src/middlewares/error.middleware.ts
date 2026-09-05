@@ -2,6 +2,8 @@ import type { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 
 import { AppError } from "../errors/AppError.js";
+import { ERROR_CODES } from "../errors/errorCodes.js";
+import { mapPrismaError } from "../errors/prismaErrorMapper.js";
 import { logger } from "../lib/logger.js";
 import { getRequestContext } from "../lib/requestContext.js";
 
@@ -14,10 +16,18 @@ export const errorMiddleware: ErrorRequestHandler = (
     const context = getRequestContext();
     const requestLogger = context?.logger ?? logger;
 
+    // Translate infrastructure errors into application errors
+    const mappedPrismaError = mapPrismaError(error);
+
+    if (mappedPrismaError) {
+        error = mappedPrismaError;
+    }
+
+    // Zod validation errors
     if (error instanceof ZodError) {
         requestLogger.warn(
             {
-                errorCode: "VALIDATION_ERROR",
+                errorCode: ERROR_CODES.VALIDATION_ERROR,
                 statusCode: 400,
                 method: req.method,
                 path: req.path,
@@ -28,7 +38,7 @@ export const errorMiddleware: ErrorRequestHandler = (
         return res.status(400).json({
             success: false,
             error: {
-                code: "VALIDATION_ERROR",
+                code: ERROR_CODES.VALIDATION_ERROR,
                 message: "Request validation failed",
                 details: error.issues.map((issue) => ({
                     field: issue.path.join("."),
@@ -38,6 +48,7 @@ export const errorMiddleware: ErrorRequestHandler = (
         });
     }
 
+    // Application errors
     if (error instanceof AppError) {
         requestLogger.warn(
             {
@@ -58,6 +69,7 @@ export const errorMiddleware: ErrorRequestHandler = (
         });
     }
 
+    // Unknown/unhandled errors
     requestLogger.error(
         {
             err: error,
@@ -71,7 +83,7 @@ export const errorMiddleware: ErrorRequestHandler = (
     return res.status(500).json({
         success: false,
         error: {
-            code: "INTERNAL_SERVER_ERROR",
+            code: ERROR_CODES.INTERNAL_SERVER_ERROR,
             message: "Something went wrong",
         },
     });
