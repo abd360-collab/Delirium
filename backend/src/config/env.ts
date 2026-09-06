@@ -33,6 +33,10 @@ const envSchema = z.object({
         .string()
         .min(1)
         .transform((value) => value as StringValue),
+
+    RAZORPAY_KEY_ID: z.string().min(1),
+
+    RAZORPAY_KEY_SECRET: z.string().min(1),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

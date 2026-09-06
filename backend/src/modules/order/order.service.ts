@@ -6,6 +6,12 @@ import { ERROR_CODES } from "../../errors/errorCodes.js";
 import { cartRepository } from "../cart/cart.repository.js";
 import { orderRepository } from "./order.repository.js";
 
+import {
+    allowedOrderStatusTransitions,
+} from "./order.types.js";
+
+import type { OrderStatus } from "../../generated/prisma/client.js";
+
 
 export const orderService = {
 
@@ -110,4 +116,59 @@ export const orderService = {
 
         return order;
     },
+
+    async updateOrderStatus(
+    orderId: string,
+    newStatus: OrderStatus,
+) {
+    const order =
+        await orderRepository.findOrderById(orderId);
+
+    if (!order) {
+        throw new AppError(
+            ERROR_CODES.ORDER_NOT_FOUND,
+            "Order not found",
+            404,
+        );
+    }
+
+    const allowedStatuses =
+        allowedOrderStatusTransitions[order.status];
+
+    if (!allowedStatuses.includes(newStatus)) {
+        throw new AppError(
+            ERROR_CODES.CONFLICT,
+            `Order cannot transition from ${order.status} to ${newStatus}`,
+            409,
+        );
+    }
+
+    const result =
+        await orderRepository.updateOrderStatus(
+            orderId,
+            order.status,
+            newStatus,
+        );
+
+    if (result.count !== 1) {
+        throw new AppError(
+            ERROR_CODES.CONFLICT,
+            "Order status was changed by another request",
+            409,
+        );
+    }
+
+    const updatedOrder =
+        await orderRepository.findOrderById(orderId);
+
+    if (!updatedOrder) {
+        throw new AppError(
+            ERROR_CODES.ORDER_NOT_FOUND,
+            "Order not found",
+            404,
+        );
+    }
+
+    return updatedOrder;
+},
 };

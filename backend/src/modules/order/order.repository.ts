@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
-import type { PrismaClient } from "../../generated/prisma/client.js";
+import type { PrismaClient, OrderStatus } from "../../generated/prisma/client.js";
 
 type OrderDb = Pick<
     PrismaClient,
@@ -9,7 +9,6 @@ type OrderDb = Pick<
 import type {
     CreateOrderData,
 } from "./order.types.js";
-
 
 export const orderRepository = {
 
@@ -68,6 +67,22 @@ export const orderRepository = {
             },
         });
     },
+
+    updateOrderStatus(
+    orderId: string,
+    currentStatus: OrderStatus,
+    newStatus: OrderStatus,
+) {
+    return prisma.order.updateMany({
+        where: {
+            id: orderId,
+            status: currentStatus,
+        },
+        data: {
+            status: newStatus,
+        },
+    });
+},
 
     
 };
