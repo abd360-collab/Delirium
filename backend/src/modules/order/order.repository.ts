@@ -1,4 +1,10 @@
 import { prisma } from "../../lib/prisma.js";
+import type { PrismaClient } from "../../generated/prisma/client.js";
+
+type OrderDb = Pick<
+    PrismaClient,
+    "order"
+>;
 
 import type {
     CreateOrderData,
@@ -7,28 +13,31 @@ import type {
 
 export const orderRepository = {
 
-    createOrder(data: CreateOrderData) {
-        return prisma.order.create({
-            data: {
-                userId: data.userId,
-                subtotalInPaise: data.subtotalInPaise,
-                totalInPaise: data.totalInPaise,
+    createOrder(
+    data: CreateOrderData,
+    db: OrderDb = prisma,
+) {
+    return db.order.create({
+        data: {
+            userId: data.userId,
+            subtotalInPaise: data.subtotalInPaise,
+            totalInPaise: data.totalInPaise,
 
-                items: {
-                    create: data.items.map((item) => ({
-                        menuItemId: item.menuItemId,
-                        name: item.name,
-                        quantity: item.quantity,
-                        unitPriceInPaise: item.unitPriceInPaise,
-                    })),
-                },
+            items: {
+                create: data.items.map((item) => ({
+                    menuItemId: item.menuItemId,
+                    name: item.name,
+                    quantity: item.quantity,
+                    unitPriceInPaise: item.unitPriceInPaise,
+                })),
             },
+        },
 
-            include: {
-                items: true,
-            },
-        });
-    },
+        include: {
+            items: true,
+        },
+    });
+},
 
 
     findOrderById(orderId: string) {

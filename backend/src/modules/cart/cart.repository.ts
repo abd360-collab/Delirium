@@ -1,4 +1,11 @@
 import { prisma } from "../../lib/prisma.js";
+import type { PrismaClient } from "../../generated/prisma/client.js";
+
+
+type CartDb = Pick<
+    PrismaClient,
+    "cart" | "cartItem"
+>;
 
 import type {
     CreateCartItemData,
@@ -79,13 +86,16 @@ export const cartRepository = {
         });
     },
 
-    clearCart(cartId: string) {
-        return prisma.cartItem.deleteMany({
-            where: {
-                cartId,
-            },
-        });
-    },
+    clearCart(
+    cartId: string,
+    db: CartDb = prisma,
+) {
+    return db.cartItem.deleteMany({
+        where: {
+            cartId,
+        },
+    });
+},
 
     findCartWithItems(cartId: string) {
         return prisma.cart.findUnique({
@@ -109,8 +119,11 @@ export const cartRepository = {
         });
     },
 
-    findCartForCheckout(userId: string) {
-    return prisma.cart.findUnique({
+    findCartForCheckout(
+    userId: string,
+    db: CartDb = prisma,
+) {
+    return db.cart.findUnique({
         where: {
             userId,
         },

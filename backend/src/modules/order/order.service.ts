@@ -3,26 +3,20 @@ import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../errors/AppError.js";
 import { ERROR_CODES } from "../../errors/errorCodes.js";
 
+import { cartRepository } from "../cart/cart.repository.js";
+import { orderRepository } from "./order.repository.js";
+
 
 export const orderService = {
 
     async createOrder(userId: string) {
-
         return prisma.$transaction(async (tx) => {
 
-            const cart = await tx.cart.findUnique({
-                where: {
+            const cart =
+                await cartRepository.findCartForCheckout(
                     userId,
-                },
-                include: {
-                    items: {
-                        include: {
-                            menuItem: true,
-                        },
-                    },
-                },
-            });
-
+                    tx,
+                );
 
             if (!cart || cart.items.length === 0) {
                 throw new AppError(
@@ -32,14 +26,10 @@ export const orderService = {
                 );
             }
 
-
             let subtotalInPaise = 0;
 
-
-            const orderItems = cart.items.map((cartItem) => {
-
+            const items = cart.items.map((cartItem) => {
                 const menuItem = cartItem.menuItem;
-
 
                 if (!menuItem.isActive) {
                     throw new AppError(
@@ -49,7 +39,6 @@ export const orderService = {
                     );
                 }
 
-
                 if (!menuItem.isAvailable) {
                     throw new AppError(
                         ERROR_CODES.VALIDATION_ERROR,
@@ -58,13 +47,10 @@ export const orderService = {
                     );
                 }
 
-
                 const itemTotal =
                     menuItem.priceInPaise * cartItem.quantity;
 
-
                 subtotalInPaise += itemTotal;
-
 
                 return {
                     menuItemId: menuItem.id,
@@ -74,35 +60,54 @@ export const orderService = {
                 };
             });
 
-
-            const totalInPaise = subtotalInPaise;
-
-
-            const order = await tx.order.create({
-                data: {
+            const order = await orderRepository.createOrder(
+                {
                     userId,
                     subtotalInPaise,
-                    totalInPaise,
-
-                    items: {
-                        create: orderItems,
-                    },
+                    totalInPaise: subtotalInPaise,
+                    items,
                 },
+                tx,
+            );
 
-                include: {
-                    items: true,
-                },
-            });
-
-
-            await tx.cartItem.deleteMany({
-                where: {
-                    cartId: cart.id,
-                },
-            });
-
+            await cartRepository.clearCart(
+                cart.id,
+                tx,
+            );
 
             return order;
         });
+    },
+
+
+    async getOrders(userId: string) {
+        return orderRepository.findOrdersByUserId(userId);
+    },
+
+
+    async getOrderById(
+        userId: string,
+        orderId: string,
+    ) {
+        const order =
+            await orderRepository.findOrderById(orderId);
+
+        if (!order) {
+            throw new AppError(
+                ERROR_CODES.ORDER_NOT_FOUND,
+                "Order not found",
+                404,
+            );
+        }
+
+        if (order.userId !== userId) {
+            throw new AppError(
+                ERROR_CODES.FORBIDDEN,
+                "You do not have permission to access this order",
+                403,
+            );
+        }
+
+        return order;
     },
 };
