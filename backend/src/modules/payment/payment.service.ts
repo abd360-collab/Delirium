@@ -1,6 +1,8 @@
 import { AppError } from "../../errors/AppError.js";
 import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { prisma } from "../../lib/prisma.js";
 import { orderRepository } from "../order/order.repository.js"
+import { outboxRepository } from "./outbox.repository.js";
 import { paymentRepository } from "./payment.repository.js";
 import { RazorpayGateway } from "./razorpay.gateway.js";
 
@@ -107,6 +109,168 @@ if (!attempt) {
     gatewayOrderId: attempt.gatewayOrderId,
     currency: "INR",
 };
+
+    },
+
+
+    async verifyPayment(
+        userId: string,
+        razorpayOrderId: string,
+        razorpayPaymentId: string,
+        razorpaySignature: string,
+    ) {
+        
+        const attempt = 
+        await paymentRepository.findAttemptByGatewayOrderId(
+            razorpayOrderId,
+        );
+
+
+        if(!attempt) {
+            throw new AppError(
+            ERROR_CODES.PAYMENT_ATTEMPT_NOT_FOUND,
+            "Payment attempt not found",
+            404,
+        );
+        }
+
+        const order = await orderRepository.findOrderById(
+            attempt.payment.orderId,
+        );
+
+         if (!order) {
+        throw new AppError(
+            ERROR_CODES.ORDER_NOT_FOUND,
+            "Order not found",
+            404,
+        );
+    }
+
+     
+         if (order.userId !== userId) {
+        throw new AppError(
+            ERROR_CODES.FORBIDDEN,
+            "You do not have permission to verify this payment",
+            403,
+        );
+    }   
+
+
+
+        const isValidSignature =
+        paymentGateway.verifyPaymentSignature({
+            gatewayOrderId: razorpayOrderId,
+            gatewayPaymentId: razorpayPaymentId,
+            gatewaySignature: razorpaySignature,
+        });
+
+    if (!isValidSignature) {
+        throw new AppError(
+            ERROR_CODES.VALIDATION_ERROR,
+            "Invalid payment signature",
+            400,
+        );
+    }
+
+     
+     const gatewayPayment =
+        await paymentGateway.fetchPayment(
+            razorpayPaymentId,
+        );
+
+    if (
+        gatewayPayment.gatewayOrderId !==
+        attempt.gatewayOrderId
+    ) {
+        throw new AppError(
+            ERROR_CODES.CONFLICT,
+            "Payment does not belong to this payment attempt",
+            409,
+        );
+    }
+
+
+     if (
+        gatewayPayment.amountInPaise !==
+        order.totalInPaise
+    ) {
+        throw new AppError(
+            ERROR_CODES.CONFLICT,
+            "Payment amount does not match order amount",
+            409,
+        );
+    }
+
+
+      if (gatewayPayment.status !== "captured") {
+        throw new AppError(
+            ERROR_CODES.CONFLICT,
+            "Payment has not been captured",
+            409,
+        );
+    }
+
+    return prisma.$transaction(async (tx) => {
+
+        const attemptUpdate = 
+        await paymentRepository.updatePaymentAttemptStatus(
+            attempt.id,
+            "CREATED",
+            "SUCCESS",
+            tx,
+        );
+
+           const paymentUpdate =
+            await paymentRepository.updatePaymentStatus(
+                attempt.paymentId,
+                "PENDING",
+                "SUCCESS",
+                tx,
+            );
+
+        if (
+            attemptUpdate.count !== 1 ||
+            paymentUpdate.count !== 1
+        ) {
+            throw new AppError(
+                ERROR_CODES.CONFLICT,
+                "Payment has already been processed",
+                409,
+            );
+        } 
+
+
+         await paymentRepository.updatePaymentAttemptGatewayDetails(
+            attempt.id,
+            razorpayPaymentId,
+            razorpaySignature,
+            tx,
+        );
+
+        await outboxRepository.createEvent(
+            {
+                eventType: "PAYMENT_SUCCESS",
+                aggregateType: "PAYMENT",
+                aggregateId: attempt.paymentId,
+                payload: {
+                    paymentId: attempt.paymentId,
+                    paymentAttemptId: attempt.id,
+                    orderId: attempt.payment.orderId,
+                    amountInPaise: attempt.payment.amountInPaise,
+                },
+            },
+            tx,
+        );
+
+
+         return {
+            paymentId: attempt.paymentId,
+            paymentAttemptId: attempt.id,
+            orderId: attempt.payment.orderId,
+            status: "SUCCESS",
+        };
+
+    });
 
     }
 }

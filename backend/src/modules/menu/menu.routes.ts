@@ -69,13 +69,13 @@ router.delete(
 // Authenticated read operations
 
 router.get(
-    "/menu-items",
+    "/",
     requireAuth,
     listMenuItems,
 );
 
 router.get(
-    "/menu-items/:id",
+    "//:id",
     requireAuth,
     getMenuItem,
 );
@@ -84,21 +84,21 @@ router.get(
 // Admin-only write operations
 
 router.post(
-    "/menu-items",
+    "/",
     requireAuth,
     requireRole("ADMIN"),
     createMenuItem,
 );
 
 router.patch(
-    "/menu-items/:id",
+    "/:id",
     requireAuth,
     requireRole("ADMIN"),
     updateMenuItem,
 );
 
 router.delete(
-    "/menu-items/:id",
+    "/:id",
     requireAuth,
     requireRole("ADMIN"),
     deleteMenuItem,

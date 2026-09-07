@@ -5,8 +5,12 @@ import { env } from "../../config/env.js";
 import type {
     CreateGatewayOrderInput,
     CreateGatewayOrderResult,
+    FetchGatewayPaymentResult,
     PaymentGateway,
+    VerifyPaymentSignatureInput,
 } from "./payment.gateway.js";
+
+import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils.js";
 
 export class RazorpayGateway implements PaymentGateway {
     private readonly razorpay: Razorpay;
@@ -33,4 +37,33 @@ export class RazorpayGateway implements PaymentGateway {
             currency: order.currency,
         };
     }
+
+   verifyPaymentSignature(
+    input: VerifyPaymentSignatureInput,
+): boolean {
+    return validatePaymentVerification(
+        {
+            order_id: input.gatewayOrderId,
+            payment_id: input.gatewayPaymentId,
+        },
+        input.gatewaySignature,
+        env.RAZORPAY_KEY_SECRET,
+    );
+}
+
+async fetchPayment(
+    gatewayPaymentId: string,
+): Promise<FetchGatewayPaymentResult> {
+    const payment =
+        await this.razorpay.payments.fetch(gatewayPaymentId);
+
+    return {
+        gatewayPaymentId: payment.id,
+        gatewayOrderId: payment.order_id,
+        amountInPaise: Number(payment.amount),
+        status: payment.status,
+    };
+}
+
+
 }

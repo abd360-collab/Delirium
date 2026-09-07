@@ -78,19 +78,7 @@ findActiveAttemptByPaymentId(
 
 
 
-findAttemptByGatewayOrderId(
-    gatewayOrderId: string,
-    db: PaymentDb = prisma,
-) {
-    return db.paymentAttempt.findUnique({
-        where: {
-            gatewayOrderId,
-        },
-        include: {
-            payment: true,
-        },
-    });
-},
+
 
 updatePaymentStatus(
     paymentId: string,
@@ -126,4 +114,38 @@ updatePaymentAttemptStatus(
         },
     });
 },
+
+findAttemptByGatewayOrderId(
+    gatewayOrderId: string,
+    db: PaymentDb = prisma,
+) {
+    return db.paymentAttempt.findUnique({
+        where: {
+            gatewayOrderId,
+        },
+        include: {
+            payment: true,
+        },
+    });
+},
+
+updatePaymentAttemptGatewayDetails(
+    attemptId: string,
+    gatewayPaymentId: string,
+    gatewaySignature: string,
+    db: PaymentDb = prisma,
+) {
+    return db.paymentAttempt.updateMany({
+        where: {
+            id: attemptId,
+            gatewayPaymentId: null,
+            gatewaySignature: null,
+        },
+        data: {
+            gatewayPaymentId,
+            gatewaySignature,
+        },
+    });
+},
+
 };

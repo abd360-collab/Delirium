@@ -39,17 +39,19 @@ export const orderRepository = {
 },
 
 
-    findOrderById(orderId: string) {
-        return prisma.order.findUnique({
-            where: {
-                id: orderId,
-            },
-
-            include: {
-                items: true,
-            },
-        });
-    },
+   findOrderById(
+    orderId: string,
+    db: OrderDb = prisma,
+) {
+    return db.order.findUnique({
+        where: {
+            id: orderId,
+        },
+        include: {
+            items: true,
+        },
+    });
+},
 
 
     findOrdersByUserId(userId: string) {
@@ -68,12 +70,13 @@ export const orderRepository = {
         });
     },
 
-    updateOrderStatus(
+   updateOrderStatus(
     orderId: string,
     currentStatus: OrderStatus,
     newStatus: OrderStatus,
+    db: OrderDb = prisma,
 ) {
-    return prisma.order.updateMany({
+    return db.order.updateMany({
         where: {
             id: orderId,
             status: currentStatus,
@@ -83,6 +86,5 @@ export const orderRepository = {
         },
     });
 },
-
     
 };

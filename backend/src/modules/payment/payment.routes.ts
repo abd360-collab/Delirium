@@ -11,4 +11,10 @@ router.post(
     paymentController.initiatePayment,
 );
 
+router.post(
+    "/verify",
+    requireAuth,
+    paymentController.verifyPayment,
+);
+
 export default router;
