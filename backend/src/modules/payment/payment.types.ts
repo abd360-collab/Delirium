@@ -36,3 +36,10 @@ export interface InitiatePaymentResult {
     gatewayOrderId: string;
     currency: string;
 }
+
+export interface PaymentSuccessEvent {
+    paymentId: string;
+    paymentAttemptId: string;
+    orderId: string;
+    amountInPaise: number;
+}

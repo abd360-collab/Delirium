@@ -3,6 +3,16 @@ import app from "./app.js";
 import { env } from "./config/env.js";
 
 import { logger } from "./lib/logger.js";
+import { connectRabbitMQ, setupRabbitMQTopology } from "./lib/rabbitmq.js";
+
+import {
+    startOutboxWorker,
+    stopOutboxWorker,
+} from "./modules/payment/outbox.worker.js";
+
+import {
+    startOrderConfirmationConsumer,
+} from "./modules/order/order-confirmation.consumer.js";
 
 let server: ReturnType<typeof app.listen>;
 
@@ -12,13 +22,14 @@ const shutdown = (signal: string) => {
         "Shutdown signal received",
     );
 
+    stopOutboxWorker();
+
     server?.close(() => {
         logger.info("HTTP server closed");
 
         process.exit(0);
     });
 };
-
 process.on("SIGTERM", () => {
     shutdown("SIGTERM");
 }); // // Commonly used by infrastructure to request termination.
@@ -47,12 +58,33 @@ process.on("unhandledRejection", (reason) => {
     process.exit(1);
 });
 
-server = app.listen(env.PORT, () => {
-    logger.info(
-        {
-            port: env.PORT,
-            environment: env.NODE_ENV,
-        },
-        "Server started",
-    );
-});
+async function startServer() {
+    try {
+        const rabbitMQChannel = await connectRabbitMQ();
+
+        await setupRabbitMQTopology(rabbitMQChannel);
+
+        await startOrderConfirmationConsumer();
+
+        server = app.listen(env.PORT, () => {
+            logger.info(
+                {
+                    port: env.PORT,
+                    environment: env.NODE_ENV,
+                },
+                "Server started",
+            );
+            
+            void startOutboxWorker();
+        });
+    } catch (error) {
+        logger.fatal(
+            { err: error },
+            "Failed to start server",
+        );
+
+        process.exit(1);
+    }
+}
+
+startServer();

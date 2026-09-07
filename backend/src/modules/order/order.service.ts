@@ -171,4 +171,46 @@ export const orderService = {
 
     return updatedOrder;
 },
+
+
+async confirmOrderAfterPayment(
+    orderId: string,
+) {
+    const result =
+        await orderRepository.updateOrderStatus(
+            orderId,
+            "PENDING",
+            "CONFIRMED",
+        );
+
+    if (result.count === 1) {
+        return {
+            confirmed: true,
+        };
+    }
+
+    const order =
+        await orderRepository.findOrderById(orderId);
+
+    if (!order) {
+        throw new AppError(
+            ERROR_CODES.ORDER_NOT_FOUND,
+            "Order not found",
+            404,
+        );
+    }
+
+    if (order.status === "CONFIRMED") {
+        return {
+            confirmed: false,
+            alreadyConfirmed: true,
+        };
+    }
+
+    throw new AppError(
+        ERROR_CODES.CONFLICT,
+        `Order cannot be confirmed because its status is ${order.status}`,
+        409,
+    );
+},
 };

@@ -16,6 +16,8 @@ const envSchema = z.object({
 
     DATABASE_URL: z.string().min(1),
 
+    RABBITMQ_URL: z.string().min(1),
+
     LOG_LEVEL: z
         .enum(["fatal", "error", "warn", "info", "debug", "trace"])
         .default("info"),
