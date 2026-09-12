@@ -43,3 +43,12 @@ export interface PaymentSuccessEvent {
     orderId: string;
     amountInPaise: number;
 }
+
+export type PaymentSuccessInput = {
+    paymentId: string;
+    paymentAttemptId: string;
+    orderId: string;
+    amountInPaise: number;
+    gatewayPaymentId: string;
+    gatewaySignature: string | undefined;
+};

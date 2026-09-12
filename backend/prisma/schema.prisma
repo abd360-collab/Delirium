@@ -249,3 +249,19 @@ model OutboxEvent {
   @@index([status, availableAt])
   @@index([aggregateType, aggregateId])
 }
+
+
+
+
+model WebhookEvent {
+  id                String           @id @default(uuid())
+  provider          String           
+  eventId           String
+  eventType         String
+  payload           Json
+  processedAt       DateTime?
+  createdAt         DateTime         @default(now())
+
+  @@unique([provider, eventId])
+  @@index([eventType])
+}

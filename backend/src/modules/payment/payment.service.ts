@@ -5,9 +5,18 @@ import { orderRepository } from "../order/order.repository.js"
 import { outboxRepository } from "./outbox.repository.js";
 import { paymentRepository } from "./payment.repository.js";
 import { RazorpayGateway } from "./razorpay.gateway.js";
+import type { PaymentSuccessInput } from "./payment.types.js";
 
 const paymentGateway = new RazorpayGateway();
+
+
+
+
+
 export const paymentService = {
+
+
+    
 
     async initiatePayment(
     userId: string,
@@ -210,17 +219,110 @@ if (!attempt) {
         );
     }
 
-    return prisma.$transaction(async (tx) => {
+   return paymentService.markPaymentSuccessful({
+    paymentId: attempt.paymentId,
+    paymentAttemptId: attempt.id,
+    orderId: attempt.payment.orderId,
+    amountInPaise: attempt.payment.amountInPaise,
+    gatewayPaymentId: razorpayPaymentId,
+    gatewaySignature: razorpaySignature,
+});
 
-        const attemptUpdate = 
-        await paymentRepository.updatePaymentAttemptStatus(
-            attempt.id,
-            "CREATED",
-            "SUCCESS",
+    },
+
+
+
+    async  markPaymentSuccessful(
+    input: PaymentSuccessInput,
+) {
+    return prisma.$transaction(async (tx) => {
+        const attempt = await paymentRepository.findAttemptById(
+            input.paymentAttemptId,
             tx,
         );
 
-           const paymentUpdate =
+        if (!attempt) {
+            throw new AppError(
+                ERROR_CODES.PAYMENT_ATTEMPT_NOT_FOUND,
+                "Payment attempt not found",
+                404,
+            );
+        }
+
+        if (attempt.paymentId !== input.paymentId) {
+            throw new AppError(
+                ERROR_CODES.CONFLICT,
+                "Payment attempt does not belong to this payment",
+                409,
+            );
+        }
+
+        if (attempt.payment.orderId !== input.orderId) {
+            throw new AppError(
+                ERROR_CODES.CONFLICT,
+                "Payment attempt does not belong to this order",
+                409,
+            );
+        }
+
+        if (attempt.payment.amountInPaise !== input.amountInPaise) {
+            throw new AppError(
+                ERROR_CODES.CONFLICT,
+                "Payment amount does not match payment record",
+                409,
+            );
+        }
+
+        /*
+         * Idempotency:
+         *
+         * If the payment was already successfully processed,
+         * simply return success instead of creating another
+         * PAYMENT_SUCCESS event.
+         */
+        if (
+            attempt.status === "SUCCESS" &&
+            attempt.payment.status === "SUCCESS"
+        ) {
+            return {
+                paymentId: attempt.paymentId,
+                paymentAttemptId: attempt.id,
+                orderId: attempt.payment.orderId,
+                status: "SUCCESS" as const,
+            };
+        }
+
+        /*
+         * We only allow:
+         *
+         * PaymentAttempt: CREATED → SUCCESS
+         * Payment:        PENDING → SUCCESS
+         */
+        if (attempt.status !== "CREATED") {
+            throw new AppError(
+                ERROR_CODES.CONFLICT,
+                `Payment attempt cannot be completed because its status is ${attempt.status}`,
+                409,
+            );
+        }
+
+        if (attempt.payment.status !== "PENDING") {
+            throw new AppError(
+                ERROR_CODES.CONFLICT,
+                `Payment cannot be completed because its status is ${attempt.payment.status}`,
+                409,
+            );
+        }
+
+        const attemptUpdate =
+            await paymentRepository.updatePaymentAttemptStatus(
+                attempt.id,
+                "CREATED",
+                "SUCCESS",
+                tx,
+            );
+
+        const paymentUpdate =
             await paymentRepository.updatePaymentStatus(
                 attempt.paymentId,
                 "PENDING",
@@ -228,22 +330,45 @@ if (!attempt) {
                 tx,
             );
 
+        /*
+         * Concurrent requests can reach this point simultaneously.
+         *
+         * If another request already completed the payment,
+         * re-check the database and make this operation idempotent.
+         */
         if (
             attemptUpdate.count !== 1 ||
             paymentUpdate.count !== 1
         ) {
+            const latestAttempt =
+                await paymentRepository.findAttemptById(
+                    input.paymentAttemptId,
+                    tx,
+                );
+
+            if (
+                latestAttempt?.status === "SUCCESS" &&
+                latestAttempt.payment.status === "SUCCESS"
+            ) {
+                return {
+                    paymentId: latestAttempt.paymentId,
+                    paymentAttemptId: latestAttempt.id,
+                    orderId: latestAttempt.payment.orderId,
+                    status: "SUCCESS" as const,
+                };
+            }
+
             throw new AppError(
                 ERROR_CODES.CONFLICT,
-                "Payment has already been processed",
+                "Payment could not be completed",
                 409,
             );
-        } 
+        }
 
-
-         await paymentRepository.updatePaymentAttemptGatewayDetails(
+        await paymentRepository.updatePaymentAttemptGatewayDetails(
             attempt.id,
-            razorpayPaymentId,
-            razorpaySignature,
+            input.gatewayPaymentId,
+            input.gatewaySignature,
             tx,
         );
 
@@ -262,15 +387,12 @@ if (!attempt) {
             tx,
         );
 
-
-         return {
+        return {
             paymentId: attempt.paymentId,
             paymentAttemptId: attempt.id,
             orderId: attempt.payment.orderId,
-            status: "SUCCESS",
+            status: "SUCCESS" as const,
         };
-
     });
-
-    }
+}
 }

@@ -1,16 +1,25 @@
 import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import router from "./routes/index.js";
+import webhookRouter from "./modules/payment/webhook.routes.js";
 import { requestIdMiddleware } from "./middlewares/requestId.middleware.js";
 import { requestLoggerMiddleware } from "./middlewares/requestLogger.middleware.js";
+import cors from "cors";
 
 
 const app = express();
 
 app.use(requestIdMiddleware); // build context for logs which needs to associated with an particular request.
 app.use(requestLoggerMiddleware); // automatic logging for req-res lifecycle.
+app.use(cors());
+
+
+app.use("/api/v1/webhooks", webhookRouter);
+
+
 
 app.use(express.json());
+
 
 
 

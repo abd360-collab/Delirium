@@ -6,7 +6,7 @@ import { requireAuth } from "../../middlewares/auth.middleware.js";
 const router = Router();
 
 router.post(
-    "/orders/:orderId/payment",
+    "/order/:orderId",
     requireAuth,
     paymentController.initiatePayment,
 );

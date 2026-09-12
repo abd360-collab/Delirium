@@ -132,20 +132,30 @@ findAttemptByGatewayOrderId(
 updatePaymentAttemptGatewayDetails(
     attemptId: string,
     gatewayPaymentId: string,
-    gatewaySignature: string,
+    gatewaySignature: string | undefined,
     db: PaymentDb = prisma,
 ) {
     return db.paymentAttempt.updateMany({
         where: {
             id: attemptId,
             gatewayPaymentId: null,
-            gatewaySignature: null,
         },
         data: {
             gatewayPaymentId,
-            gatewaySignature,
+            ...(gatewaySignature !== undefined
+                ? { gatewaySignature }
+                : {}),
         },
     });
 },
 
+findAttemptById(
+    attemptId: string,
+    db: PaymentDb = prisma,
+) {
+    return db.paymentAttempt.findUnique({
+        where: { id: attemptId },
+        include: { payment: true },
+    });
+},
 };

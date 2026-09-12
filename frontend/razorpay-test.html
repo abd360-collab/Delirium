@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Test</title>
+</head>
+
+<body>
+    <h2>Razorpay Test Payment</h2>
+
+    <button id="pay-btn">Pay ₹980</button>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        // Use ONE fresh access token here.
+        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTZiYjM1OC0xYzZkLTQ4NmUtYmUxOC1iZGI4MGJhMGFjZjYiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3ODkxOTM2NTEsImV4cCI6MTc4OTE5NzI1MX0.2gkK_EssuGcCtuOntUvv85Kx7yqUEQh2JfhQk6qrc1k";
+
+        const options = {
+            key: "rzp_test_SWWziKiIioAoGC",
+
+            // 49000 paise = ₹490
+            amount: 98000,
+            currency: "INR",
+
+            name: "Delirium",
+            description: "Test Order",
+
+            // Returned by your backend
+            order_id: "order_Tb1TpO4e6z2kDz",
+
+            handler: async function (response) {
+                console.log("Razorpay response:", response);
+
+                try {
+                    const result = await fetch(
+                        "http://localhost:3000/api/v1/payment/verify",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${accessToken}`
+                            },
+
+                            body: JSON.stringify({
+                                razorpay_order_id:
+                                    response.razorpay_order_id,
+
+                                razorpay_payment_id:
+                                    response.razorpay_payment_id,
+
+                                razorpay_signature:
+                                    response.razorpay_signature
+                            })
+                        }
+                    );
+
+                    const data = await result.json();
+
+                    console.log(
+                        "Verification status:",
+                        result.status
+                    );
+
+                    console.log(
+                        "Backend verification:",
+                        data
+                    );
+
+                    if (!result.ok) {
+                        alert(
+                            `Payment verification failed.\n\n` +
+                            `Status: ${result.status}\n` +
+                            `Message: ${data.message || "Unknown error"}`
+                        );
+
+                        return;
+                    }
+
+                    alert("Payment verified successfully!");
+
+                } catch (error) {
+                    console.error(
+                        "Verification request failed:",
+                        error
+                    );
+
+                    alert("Could not connect to backend.");
+                }
+            }
+        };
+
+        const razorpay = new Razorpay(options);
+
+        document
+            .getElementById("pay-btn")
+            .onclick = function () {
+                razorpay.open();
+            };
+    </script>
+</body>
+</html>
