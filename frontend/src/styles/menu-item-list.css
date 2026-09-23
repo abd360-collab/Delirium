@@ -1,0 +1,19 @@
+.menu-item-list {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: var(--space-5);
+}
+
+@media (max-width: 1000px) {
+    .menu-item-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .menu-item-list {
+        grid-template-columns: 1fr;
+    }
+}

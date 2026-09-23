@@ -1,0 +1,81 @@
+@import "./styles/tokens.css";
+@import "./styles/customer-header.css";
+@import "./styles/hero.css";
+@import "./styles/featured-section.css";
+@import "./styles/category-navigation.css";
+@import "./styles/menu-item-card.css";
+@import "./styles/menu-item-list.css";
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    background: var(--color-background);
+    color: var(--color-text);
+
+    font-family: var(--font-body);
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}@import "./styles/tokens.css";
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    background: var(--color-background);
+    color: var(--color-text);
+
+    font-family: var(--font-body);
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}

@@ -26,6 +26,12 @@ const envSchema = z.object({
 
     JWT_REFRESH_TOKEN_SECRET: z.string().min(1),
 
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    GOOGLE_REDIRECT_URI: z.string().url(),
+
+    FRONTEND_URL: z.string().url(),
+
     JWT_ACCESS_TOKEN_EXPIRY: z
         .string()
         .min(1)

@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  passwordHash String
-  name         String
-  role         UserRole  @default(CUSTOMER)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  cart         Cart?
-  order        Order[]
-  sessions     Session[]
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  googleId  String   @unique
+  role      UserRole @default(CUSTOMER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart      Cart?
+  orders    Order[]
+  sessions  Session[]
 }
 
 model Session {
@@ -150,7 +152,6 @@ model PaymentAttempt {
   @@index([paymentId])
   @@index([status])
 }
-
 
 model OutboxEvent {
   id            String            @id @default(uuid())
