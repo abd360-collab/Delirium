@@ -5,12 +5,10 @@ import { useAuth } from "../../../../hooks/useAuth";
 
 interface CustomerHeaderProps {
     cartItemCount: number;
-    onCartClick: () => void;
 }
 
 export function CustomerHeader({
     cartItemCount,
-    onCartClick,
 }: CustomerHeaderProps) {
     const {
         user,
@@ -43,9 +41,9 @@ export function CustomerHeader({
                     className="site-header__nav"
                     aria-label="Main navigation"
                 >
-                    <a href="/menu">Menu</a>
-                    <a href="#featured">Featured</a>
-                    <a href="#about">About</a>
+                    <Link to="/menu">Menu</Link>
+                    <Link to="/featured">Featured</Link>
+                    <Link to="/about">About</Link>
                 </nav>
 
                 <div className="site-header__actions">
@@ -67,19 +65,19 @@ export function CustomerHeader({
                         </button>
                     )}
 
-                    <button
-                        type="button"
-                        className="site-header__cart"
-                        onClick={onCartClick}
-                        aria-label={`Cart with ${cartItemCount} items`}
-                    >
-                        Cart
-                        {cartItemCount > 0 && (
-                            <span className="site-header__cart-count">
-                                {cartItemCount}
-                            </span>
-                        )}
-                    </button>
+                   <Link
+    to="/cart"
+    className="site-header__cart"
+    aria-label={`Cart with ${cartItemCount} items`}
+>
+    Cart
+
+    {cartItemCount > 0 && (
+        <span className="site-header__cart-count">
+            {cartItemCount}
+        </span>
+    )}
+</Link>
                 </div>
             </div>
         </header>

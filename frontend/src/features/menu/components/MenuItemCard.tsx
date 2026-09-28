@@ -3,11 +3,13 @@ import type { MenuItem } from "../../../types/menu.types";
 interface MenuItemCardProps {
     menuItem: MenuItem;
     onAdd: (menuItem: MenuItem) => void;
+    isSelected?: boolean;
 }
 
 export function MenuItemCard({
     menuItem,
     onAdd,
+    isSelected,
 }: MenuItemCardProps) {
     const isUnavailable =
         !menuItem.isActive || !menuItem.isAvailable;
@@ -16,11 +18,16 @@ export function MenuItemCard({
 
     return (
         <article
-            className={
-                isUnavailable
-                    ? "menu-item-card menu-item-card--unavailable"
-                    : "menu-item-card"
-            }
+            id={`menu-item-${menuItem.id}`}
+            className={[
+                "menu-item-card",
+                isUnavailable &&
+                    "menu-item-card--unavailable",
+                isSelected &&
+                    "menu-item-card--selected",
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             <div className="menu-item-card__image-wrapper">
                 {menuItem.imageUrl ? (
@@ -65,7 +72,9 @@ export function MenuItemCard({
                         onAdd(menuItem);
                     }}
                 >
-                    {isUnavailable ? "Unavailable" : "Add to Cart"}
+                    {isUnavailable
+                        ? "Unavailable"
+                        : "Add to Cart"}
                 </button>
             </div>
         </article>

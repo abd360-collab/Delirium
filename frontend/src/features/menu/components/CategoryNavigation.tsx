@@ -17,19 +17,17 @@ export function CategoryNavigation({
 
     return (
         <nav
-            className="category-navigation"
+            className="menu-category-nav"
             aria-label="Menu categories"
         >
             <button
                 type="button"
-                className={
+                className={`menu-category-nav__button ${
                     selectedCategoryId === null
-                        ? "category-navigation__item category-navigation__item--active"
-                        : "category-navigation__item"
-                }
-                onClick={() => {
-                    onCategorySelect(null);
-                }}
+                        ? "menu-category-nav__button--active"
+                        : ""
+                }`}
+                onClick={() => onCategorySelect(null)}
                 aria-pressed={selectedCategoryId === null}
             >
                 All
@@ -39,17 +37,13 @@ export function CategoryNavigation({
                 <button
                     key={category.id}
                     type="button"
-                    className={
+                    className={`menu-category-nav__button ${
                         selectedCategoryId === category.id
-                            ? "category-navigation__item category-navigation__item--active"
-                            : "category-navigation__item"
-                    }
-                    onClick={() => {
-                        onCategorySelect(category.id);
-                    }}
-                    aria-pressed={
-                        selectedCategoryId === category.id
-                    }
+                            ? "menu-category-nav__button--active"
+                            : ""
+                    }`}
+                    onClick={() => onCategorySelect(category.id)}
+                    aria-pressed={selectedCategoryId === category.id}
                 >
                     {category.name}
                 </button>

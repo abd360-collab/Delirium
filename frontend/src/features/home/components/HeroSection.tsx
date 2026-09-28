@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export function HeroSection() {
     return (
         <section className="hero">
@@ -17,32 +19,33 @@ export function HeroSection() {
                     and everything in between.
                 </p>
 
-                <a
-                    href="/menu"
+                <Link
+                    to="/menu"
                     className="hero__cta"
                 >
                     Explore Menu
-                </a>
+                </Link>
             </div>
 
             <div className="hero__visual">
-    <div className="hero__image-wrap">
-        <img
-            src="YOUR_WORKING_MENU_IMAGE_URL"
-            alt="Delirium signature waffle"
-            className="hero__image"
-        />
-    </div>
+                <div className="hero__image-wrap">
+                    <img
+                        src="/hero-waffle.png"
+                        alt="Woman enjoying a decadent waffle at Delirium"
+                        className="hero__image"
+                    />
+                </div>
 
-    <div className="hero__visual-label">
-        <span>THE</span>
-        <strong>
-            WAFFLE
-            <br />
-            PARADOX
-        </strong>
-    </div>
-</div>
+                <div className="hero__visual-label">
+                    <span>THE</span>
+
+                    <strong>
+                        WAFFLE
+                        <br />
+                        PARADOX
+                    </strong>
+                </div>
+            </div>
         </section>
     );
 }

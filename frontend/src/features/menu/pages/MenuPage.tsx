@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import {
     getCategories,
@@ -15,15 +16,22 @@ import { MenuItemList } from "../components/MenuItemList";
 
 import { useCartContext } from "../../../context/CartContext";
 
-
 export function MenuPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-    const [selectedCategoryId, setSelectedCategoryId] =
-        useState<string | null>(null);
+
+    const [searchParams, setSearchParams] =
+        useSearchParams();
+
+    const selectedCategoryId =
+        searchParams.get("category");
+
+    const selectedItemId =
+        searchParams.get("item");
 
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] =
+        useState<string | null>(null);
 
     const { addItem } = useCartContext();
 
@@ -35,11 +43,13 @@ export function MenuPage() {
                 setIsLoading(true);
                 setError(null);
 
-                const [loadedCategories, loadedMenuItems] =
-                    await Promise.all([
-                        getCategories(),
-                        getMenuItems(),
-                    ]);
+                const [
+                    loadedCategories,
+                    loadedMenuItems,
+                ] = await Promise.all([
+                    getCategories(),
+                    getMenuItems(),
+                ]);
 
                 if (!isMounted) {
                     return;
@@ -78,6 +88,34 @@ export function MenuPage() {
         );
     }, [menuItems, selectedCategoryId]);
 
+    const selectedMenuItem = useMemo(() => {
+        if (selectedItemId === null) {
+            return null;
+        }
+
+        return (
+            menuItems.find(
+                (menuItem) =>
+                    menuItem.id === selectedItemId,
+            ) ?? null
+        );
+    }, [menuItems, selectedItemId]);
+
+    useEffect(() => {
+        if (!selectedMenuItem) {
+            return;
+        }
+
+        const element = document.getElementById(
+            `menu-item-${selectedMenuItem.id}`,
+        );
+
+        element?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+        });
+    }, [selectedMenuItem]);
+
     if (isLoading) {
         return <div>Loading menu...</div>;
     }
@@ -86,11 +124,8 @@ export function MenuPage() {
         return <div>{error}</div>;
     }
 
-   
-
     return (
         <div>
-
             <section
                 id="menu"
                 className="menu-section"
@@ -103,20 +138,32 @@ export function MenuPage() {
                     <h2>THE MENU</h2>
 
                     <p>
-                        Pick your craving. Enter your state of
-                        delicious confusion.
+                        Pick your craving. Enter your state
+                        of delicious confusion.
                     </p>
                 </div>
 
                 <CategoryNavigation
                     categories={categories}
-                    selectedCategoryId={selectedCategoryId}
-                    onCategorySelect={setSelectedCategoryId}
+                    selectedCategoryId={
+                        selectedCategoryId
+                    }
+                    onCategorySelect={(categoryId) => {
+                        if (categoryId === null) {
+                            setSearchParams({});
+                            return;
+                        }
+
+                        setSearchParams({
+                            category: categoryId,
+                        });
+                    }}
                 />
 
                 <MenuItemList
                     menuItems={filteredMenuItems}
                     onAdd={addItem}
+                    selectedItemId={selectedItemId}
                 />
             </section>
         </div>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { MenuItem } from "../../../types/menu.types";
 
 interface FeaturedSectionProps {
@@ -17,19 +18,22 @@ export function FeaturedSection({
                     ENTER THE DELIRIUM
                 </p>
 
-                <h2>
+                <h2 className="featured-section__title">
                     {menuItem?.name ?? "THE WAFFLE PARADOX"}
                 </h2>
 
                 {menuItem?.description && (
-                    <p>
+                    <p className="featured-section__description">
                         {menuItem.description}
                     </p>
                 )}
 
-                <a href="/menu">
+                <Link
+                    to="/menu"
+                    className="featured-section__cta"
+                >
                     Discover the Menu
-                </a>
+                </Link>
             </div>
 
             <div className="featured-section__visual">

@@ -1,0 +1,172 @@
+.customer-footer {
+    margin-top: var(--space-10);
+
+    background: var(--color-ink);
+    color: var(--color-cream);
+}
+
+
+/* --------------------------------
+   Main footer
+-------------------------------- */
+
+.customer-footer__inner {
+    width: min(
+        calc(100% - (var(--page-padding) * 2)),
+        var(--content-width)
+    );
+
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: 1.6fr 0.7fr 1fr;
+    gap: var(--space-8);
+
+    padding: var(--space-9) 0;
+}
+
+
+/* --------------------------------
+   Brand
+-------------------------------- */
+
+.customer-footer__brand-name {
+    display: inline-block;
+
+    color: var(--color-cream);
+
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+
+    text-decoration: none;
+}
+
+.customer-footer__tagline {
+    margin: var(--space-3) 0 0;
+
+    color: var(--color-accent);
+
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+}
+
+.customer-footer__description {
+    max-width: 360px;
+
+    margin: var(--space-5) 0 0;
+
+    color: rgba(255, 248, 233, 0.68);
+
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+
+/* --------------------------------
+   Footer links / contact
+-------------------------------- */
+
+.customer-footer__links,
+.customer-footer__contact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.customer-footer__heading {
+    margin: 0 0 var(--space-4);
+
+    color: var(--color-cream);
+
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+}
+
+.customer-footer__links a {
+    margin-bottom: var(--space-3);
+
+    color: rgba(255, 248, 233, 0.72);
+
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition:
+        color var(--duration-fast) var(--ease-standard),
+        transform var(--duration-fast) var(--ease-standard);
+}
+
+.customer-footer__links a:hover {
+    color: var(--color-accent);
+
+    transform: translateX(3px);
+}
+
+.customer-footer__contact p:not(.customer-footer__heading) {
+    margin: 0 0 var(--space-2);
+
+    color: rgba(255, 248, 233, 0.68);
+
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+
+/* --------------------------------
+   Bottom bar
+-------------------------------- */
+
+.customer-footer__bottom {
+    width: min(
+        calc(100% - (var(--page-padding) * 2)),
+        var(--content-width)
+    );
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: var(--space-4) 0;
+
+    border-top: 1px solid rgba(255, 248, 233, 0.14);
+
+    color: rgba(255, 248, 233, 0.42);
+
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+
+/* --------------------------------
+   Mobile
+-------------------------------- */
+
+@media (max-width: 760px) {
+    .customer-footer__inner {
+        grid-template-columns: 1fr;
+        gap: var(--space-7);
+
+        padding: var(--space-8) 0;
+    }
+
+    .customer-footer__brand-name {
+        font-size: 3.2rem;
+    }
+
+    .customer-footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+
+        padding: var(--space-4) 0;
+    }
+}

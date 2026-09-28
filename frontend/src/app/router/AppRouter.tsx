@@ -1,19 +1,19 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import { AuthProvider } from "../../context/AuthContext";
+
 import { CustomerLayout } from "../../layouts/CustomerLayout";
 import { AdminLayout } from "../../layouts/AdminLayout";
+
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AdminRoute } from "./AdminRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
-import { MenuPage } from "../../features/menu/pages/MenuPage";
 import { AuthenticatedRedirect } from "./AuthenticatedRedirect";
+
 import { HomePage } from "../../features/home/pages/HomePage";
-
-
-
-// function HomePage() {
-//     return <h2>Home</h2>;
-// }
+import { MenuPage } from "../../features/menu/pages/MenuPage";
+import { CartPage } from "../../features/cart/pages/CartPage";
+import { CheckoutPage } from "../../features/checkout/pages/CheckoutPage";
 
 function LoginPage() {
     function handleGoogleLogin() {
@@ -54,36 +54,64 @@ export function AppRouter() {
     return (
         <BrowserRouter>
             <AuthProvider>
-               <Routes>
-    <Route element={<CustomerLayout />}>
-    <Route path="/" element={<HomePage />} />
-    <Route path="/menu" element={<MenuPage />} />
+                <Routes>
+                    <Route element={<CustomerLayout />}>
+                        <Route
+                            path="/"
+                            element={<HomePage />}
+                        />
 
-    <Route element={<PublicOnlyRoute />}>
-        <Route path="/login" element={<LoginPage />} />
-    </Route>
+                        <Route
+                            path="/menu"
+                            element={<MenuPage />}
+                        />
 
-    <Route element={<ProtectedRoute />}>
-        <Route path="/orders" element={<OrdersPage />} />
-    </Route>
-</Route>
+                        <Route element={<PublicOnlyRoute />}>
+                            <Route
+                                path="/login"
+                                element={<LoginPage />}
+                            />
+                        </Route>
 
-    <Route
-        path="/auth/callback"
-        element={<AuthenticatedRedirect />}
-    />
+                        <Route element={<ProtectedRoute />}>
+                            <Route
+                                path="/orders"
+                                element={<OrdersPage />}
+                            />
 
-    <Route element={<AdminRoute />}>
-        <Route path="/admin" element={<AdminLayout />}>
-            <Route
-                index
-                element={<AdminDashboardPage />}
-            />
-        </Route>
-    </Route>
+                            <Route
+                                path="/cart"
+                                element={<CartPage />}
+                            />
+                            <Route
+                                path="/checkout"
+                                element={<CheckoutPage />}
+                            />
+                        </Route>
+                    </Route>
 
-    <Route path="*" element={<NotFoundPage />} />
-</Routes>
+                    <Route
+                        path="/auth/callback"
+                        element={<AuthenticatedRedirect />}
+                    />
+
+                    <Route element={<AdminRoute />}>
+                        <Route
+                            path="/admin"
+                            element={<AdminLayout />}
+                        >
+                            <Route
+                                index
+                                element={<AdminDashboardPage />}
+                            />
+                        </Route>
+                    </Route>
+
+                    <Route
+                        path="*"
+                        element={<NotFoundPage />}
+                    />
+                </Routes>
             </AuthProvider>
         </BrowserRouter>
     );
