@@ -14,6 +14,7 @@ import { HomePage } from "../../features/home/pages/HomePage";
 import { MenuPage } from "../../features/menu/pages/MenuPage";
 import { CartPage } from "../../features/cart/pages/CartPage";
 import { CheckoutPage } from "../../features/checkout/pages/CheckoutPage";
+import { OrdersPage } from "../../features/order/pages/OrderPage";
 
 function LoginPage() {
     function handleGoogleLogin() {
@@ -38,9 +39,6 @@ function LoginPage() {
     );
 }
 
-function OrdersPage() {
-    return <h2>Orders</h2>;
-}
 
 function AdminDashboardPage() {
     return <h2>Admin Dashboard</h2>;

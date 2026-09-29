@@ -162,6 +162,41 @@
     text-align: center;
 }
 
+.checkout-page__error {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-8);
+    border: var(--border-thin);
+    border-radius: 12px;
+    background: var(--color-white);
+    text-align: center;
+}
+
+.checkout-page__error-title {
+    margin: 0 0 var(--space-4);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.checkout-page__error-text {
+    margin: 0 0 var(--space-6);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.checkout-page__error-link {
+    display: block;
+    margin-top: var(--space-3);
+    color: var(--color-accent-dark);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.checkout-page__error-link:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     .checkout-page {
         padding: var(--space-7) 0;

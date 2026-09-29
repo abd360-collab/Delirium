@@ -15,22 +15,36 @@ import {
 
 import type { Order } from "../../../types/order.types";
 import type { RazorpayPaymentResponse } from "../../../types/razorpay.types";
+import { formatInr } from "../../../utils/currency";
 
 export function CheckoutPage() {
     const {
         cart,
         isLoading,
+        clearCartState,
     } = useCartContext();
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] =
+        useState(false);
+
+    const [isPaymentOpen, setIsPaymentOpen] =
+        useState(false);
+
     const [createdOrder, setCreatedOrder] =
         useState<Order | null>(null);
+
+    const [paymentMessage, setPaymentMessage] =
+        useState<string | null>(null);
+
+    const [paymentError, setPaymentError] =
+        useState<string | null>(null);
 
     const subtotalInPaise =
         cart?.items.reduce(
             (total, item) =>
                 total +
-                item.menuItem.priceInPaise * item.quantity,
+                item.menuItem.priceInPaise *
+                    item.quantity,
             0,
         ) ?? 0;
 
@@ -53,11 +67,72 @@ export function CheckoutPage() {
                     </h1>
 
                     <p className="checkout-page__success-text">
-                        Your payment was successful and your order has been confirmed.
+                        Your payment was successful and your order
+                        has been confirmed.
                     </p>
 
                     <p className="checkout-page__success-order">
                         Order ID: {createdOrder.id}
+                    </p>
+
+                    <Link
+                        to="/orders"
+                        className="checkout-page__success-link"
+                    >
+                        View My Orders
+                    </Link>
+
+                    <Link
+                        to="/menu"
+                        className="checkout-page__success-link"
+                    >
+                        Continue Shopping
+                    </Link>
+                </div>
+            </section>
+        );
+    }
+
+    if (paymentError) {
+        return (
+            <section className="checkout-page">
+                <div className="checkout-page__error">
+                    <h1 className="checkout-page__error-title">
+                        Payment Verification Pending
+                    </h1>
+
+                    <p className="checkout-page__error-text">
+                        {paymentError}
+                    </p>
+
+                    <Link
+                        to="/orders"
+                        className="checkout-page__error-link"
+                    >
+                        Check My Orders
+                    </Link>
+
+                    <Link
+                        to="/menu"
+                        className="checkout-page__error-link"
+                    >
+                        Return to Menu
+                    </Link>
+                </div>
+            </section>
+        );
+    }
+
+    if (paymentMessage) {
+        return (
+            <section className="checkout-page">
+                <div className="checkout-page__success">
+                    <h1 className="checkout-page__success-title">
+                        Payment Received
+                    </h1>
+
+                    <p className="checkout-page__success-text">
+                        {paymentMessage}
                     </p>
 
                     <Link
@@ -87,7 +162,8 @@ export function CheckoutPage() {
                     </h1>
 
                     <p className="checkout-page__empty-text">
-                        Add something from the menu before checking out.
+                        Add something from the menu before
+                        checking out.
                     </p>
 
                     <Link
@@ -138,10 +214,10 @@ export function CheckoutPage() {
                             </div>
 
                             <span className="checkout-page__item-total">
-                                ₹
-                                {(item.menuItem.priceInPaise *
-                                    item.quantity) /
-                                    100}
+                                {formatInr(
+                                    item.menuItem.priceInPaise *
+                                        item.quantity,
+                                )}
                             </span>
                         </article>
                     ))}
@@ -153,52 +229,80 @@ export function CheckoutPage() {
                     </h2>
 
                     <div className="checkout-page__summary-row">
-                        <span>
-                            Subtotal
-                        </span>
+                        <span>Subtotal</span>
 
                         <strong>
-                            ₹{subtotalInPaise / 100}
+                            {formatInr(subtotalInPaise)}
                         </strong>
                     </div>
 
                     <button
                         type="button"
                         className="checkout-page__submit"
-                        disabled={isSubmitting}
+                        disabled={
+                            isSubmitting ||
+                            isPaymentOpen
+                        }
                         onClick={async () => {
                             try {
                                 setIsSubmitting(true);
 
-                                const order = await createOrder();
-                                setCreatedOrder(order);
+                                const order =
+                                    await createOrder();
 
                                 const paymentOrder =
-                                    await createPaymentOrder(order.id);
+                                    await createPaymentOrder(
+                                        order.id,
+                                    );
 
                                 const razorpayOptions = {
-                                    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                                    amount: paymentOrder.amountInPaise,
-                                    currency: paymentOrder.currency,
+                                    key: import.meta.env
+                                        .VITE_RAZORPAY_KEY_ID,
+
+                                    amount:
+                                        paymentOrder.amountInPaise,
+
+                                    currency:
+                                        paymentOrder.currency,
+
                                     name: "DELIRIUM",
-                                    description: `Order ${order.id}`,
-                                    order_id: paymentOrder.gatewayOrderId,
+
+                                    description:
+                                        `Order ${order.id}`,
+
+                                    order_id:
+                                        paymentOrder.gatewayOrderId,
 
                                     handler: async (
                                         response: RazorpayPaymentResponse,
                                     ) => {
                                         try {
                                             const verification =
-                                                await verifyPayment(response);
+                                                await verifyPayment(
+                                                    response,
+                                                );
+
+                                            clearCartState();
 
                                             const confirmedOrder =
                                                 await getOrder(
                                                     verification.orderId,
                                                 );
 
-                                            setCreatedOrder(
-                                                confirmedOrder,
-                                            );
+                                            if (
+                                                confirmedOrder.status ===
+                                                "CONFIRMED"
+                                            ) {
+                                                setCreatedOrder(
+                                                    confirmedOrder,
+                                                );
+                                            } else {
+                                                setPaymentMessage(
+                                                    "Your payment was received, but your order is still being processed.",
+                                                );
+                                            }
+
+                                            setIsPaymentOpen(false);
 
                                             console.log(
                                                 "Payment verified:",
@@ -210,11 +314,27 @@ export function CheckoutPage() {
                                                 confirmedOrder,
                                             );
                                         } catch (error) {
+                                            setIsPaymentOpen(false);
+
+                                            setPaymentError(
+                                                "We couldn't confirm your payment right now. Please check your orders before trying again.",
+                                            );
+
                                             console.error(
                                                 "Payment verification failed:",
                                                 error,
                                             );
                                         }
+                                    },
+
+                                    modal: {
+                                        ondismiss: () => {
+                                            setIsPaymentOpen(false);
+
+                                            console.log(
+                                                "Razorpay checkout dismissed",
+                                            );
+                                        },
                                     },
                                 };
 
@@ -224,6 +344,8 @@ export function CheckoutPage() {
                                     );
 
                                 razorpay.open();
+
+                                setIsPaymentOpen(true);
 
                                 console.log(
                                     "Order created:",
@@ -244,12 +366,15 @@ export function CheckoutPage() {
                             }
                         }}
                     >
-                        {isSubmitting
-                            ? "Creating Order..."
-                            : "Place Order & Pay"}
+                       {isPaymentOpen ? 
+                       "Payment in Progress..." 
+                       : isSubmitting
+                        ? "Creating Order..." 
+                        : "Place Order & Pay"}
                     </button>
                 </aside>
             </div>
         </section>
     );
 }
+

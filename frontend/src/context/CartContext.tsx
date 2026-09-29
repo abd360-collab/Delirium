@@ -33,6 +33,8 @@ interface CartContextValue {
     removeItem: (cartItemId: string) => Promise<void>;
 
     clearCartItems: () => Promise<void>;
+
+    clearCartState: () => void;
 }
 
 const CartContext =
@@ -133,6 +135,19 @@ export function CartProvider({
         });
     }
 
+    function clearCartState() {
+    setCart((currentCart) => {
+        if (!currentCart) {
+            return currentCart;
+        }
+
+        return {
+            ...currentCart,
+            items: [],
+        };
+    });
+}
+
     return (
         <CartContext.Provider
             value={{
@@ -142,6 +157,7 @@ export function CartProvider({
                 updateItem,
                 removeItem,
                 clearCartItems,
+                clearCartState,
             }}
         >
             {children}

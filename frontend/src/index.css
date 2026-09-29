@@ -13,6 +13,7 @@
 @import "./styles/final-cta.css";
 @import "./styles/cart-page.css";
 @import "./styles/checkout-page.css";
+@import "./styles/orders-page.css";
 
 * {
     box-sizing: border-box;

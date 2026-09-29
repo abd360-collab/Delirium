@@ -11,14 +11,21 @@ export interface RazorpayOptions {
     name: string;
     description: string;
     order_id: string;
+
     handler: (
         response: RazorpayPaymentResponse,
     ) => void | Promise<void>;
+
+    modal?: {
+        ondismiss?: () => void;
+    };
+
     prefill?: {
         name?: string;
         email?: string;
         contact?: string;
     };
+
     theme?: {
         color?: string;
     };

@@ -17,6 +17,13 @@ interface GetOrderResponse {
     };
 }
 
+interface GetOrdersResponse {
+    success: boolean;
+    data: {
+        orders: Order[];
+    };
+}
+
 export async function createOrder(): Promise<Order> {
     const response =
         await apiClient.post<CreateOrderResponse>("/order/");
@@ -34,4 +41,14 @@ export async function getOrder(
         );
 
     return response.data.data.order;
+}
+
+
+export async function getOrders(): Promise<Order[]> {
+    const response =
+        await apiClient.get<GetOrdersResponse>(
+            "/order/",
+        );
+
+    return response.data.data.orders;
 }
