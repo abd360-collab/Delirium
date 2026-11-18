@@ -5,9 +5,7 @@ import {
 } from "./auth.schema.js";
 
 import { authService } from "./auth.service.js";
-
-import { googleOAuthClient } from "../../config/google.js";
-
+import { googleOAuthClient } from "../../infrastructure/identity/google.js";
 import { env } from "../../config/env.js";
 
 import crypto from "node:crypto";

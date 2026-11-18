@@ -1,11 +1,11 @@
 import express from "express";
-import { errorMiddleware } from "./middlewares/error.middleware.js";
+import { errorMiddleware } from "./shared/middlewares/error.middleware.js";
 import router from "./routes/index.js";
 import webhookRouter from "./modules/payment/webhook.routes.js";
-import { requestIdMiddleware } from "./middlewares/requestId.middleware.js";
-import { requestLoggerMiddleware } from "./middlewares/requestLogger.middleware.js";
+import { requestIdMiddleware } from "./shared/middlewares/requestId.middleware.js";
+import { requestLoggerMiddleware } from "./shared/middlewares/requestLogger.middleware.js";
 import cors from "cors";
-import { apiRateLimiter } from "./middlewares/rateLimit.middleware.js";
+import { apiRateLimiter } from "./shared/middlewares/rateLimit.middleware.js";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 

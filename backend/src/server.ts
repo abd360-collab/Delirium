@@ -2,7 +2,7 @@
 import { createServer } from "node:http";
 import app from "./app.js";
 import { env } from "./config/env.js";
-import { logger } from "./config/logger.js";
+
 import {
     connectRabbitMQ,
     registerRabbitMQRecoveryHandler,
@@ -20,6 +20,7 @@ import { startOrderConfirmationConsumer } from "./modules/order/order-confirmati
 import { startRefundReconciliationWorker } from "./modules/payment/refund.reconciliation.worker.js";
 import { createRealtimeServer } from "./modules/realtime/realtime.server.js";
 import { startOrderRealtimeConsumer } from "./modules/order/order-realtime.consumer.js";
+import { logger } from "./shared/observability/logger.js";
 
 let server: ReturnType<typeof createServer>;
 

@@ -1,4 +1,4 @@
-import { logger } from "../../config/logger.js";
+import { logger } from "../../shared/observability/logger.js";
 import { publishOutboxEvents } from "./outbox.publisher.js";
 
 const POLL_INTERVAL_MS = 1_000;

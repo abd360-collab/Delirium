@@ -1,9 +1,9 @@
 
 import type { Server } from "socket.io";
 
-import { logger } from "../../config/logger.js";
+import { logger } from "../../shared/observability/logger.js";
 import { connectRabbitMQConsumer } from "../../infrastructure/messaging/rabbitmq/rabbitmq.js";
-import { RABBITMQ_QUEUES } from "../../lib/rabbitmq.constants.js";
+import { RABBITMQ_QUEUES } from "../../infrastructure/messaging/rabbitmq/rabbitmq.constants.js";
 import { orderStatusChangedEventSchema } from "../realtime/realtime.schema.js";
 import { REALTIME_ROOMS } from "../realtime/realtime.constants.js";
 import { orderRepository } from "./order.repository.js";

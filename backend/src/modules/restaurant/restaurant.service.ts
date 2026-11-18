@@ -1,6 +1,6 @@
 
-import { AppError } from "../../errors/AppError.js";
-import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import { ERROR_CODES } from "../../shared/errors/errorCodes.js";
 import { restaurantRepository } from "./restaurant.repository.js";
 import type { UpdateRestaurantInput } from "./restaurant.schema.js";
 

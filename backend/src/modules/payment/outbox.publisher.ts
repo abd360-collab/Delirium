@@ -1,8 +1,8 @@
-import { logger } from "../../config/logger.js";
+import { logger } from "../../shared/observability/logger.js";
 import { connectRabbitMQ } from "../../infrastructure/messaging/rabbitmq/rabbitmq.js";
 import {
     RABBITMQ_EXCHANGES,
-} from "../../lib/rabbitmq.constants.js";
+} from "../../infrastructure/messaging/rabbitmq/rabbitmq.constants.js";
 import { outboxRepository } from "./outbox.repository.js";
 import { getOutboxRoutingKey } from "./outbox.events.js";
 import { serializeOutboxPayload } from "./outbox.message.js";

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
-import { env } from "../config/env.js";
+import { env } from "../../config/env.js";
 
 type AccessTokenPayload = {
     sub: string;

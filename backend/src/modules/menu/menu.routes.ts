@@ -13,9 +13,9 @@ import {
     deleteMenuItem,
     uploadMenuImage,
 } from "./menu.controller.js";
-import { requireAuth } from "../../middlewares/auth.middleware.js";
-import { requireRole } from "../../middlewares/authorization.middleware.js";
-import { uploadSingleImage } from "../../middlewares/upload.middleware.js";
+import { requireAuth } from "../../shared/middlewares/auth.middleware.js";
+import { requireRole } from "../../shared/middlewares/authorization.middleware.js";
+import { uploadSingleImage } from "../../shared/middlewares/upload.middleware.js";
 
 
 const router = Router();

@@ -7,7 +7,7 @@ import {
     removeCartItem,
     clearCart,
 } from "./cart.controller.js";
-import { requireAuth } from "../../middlewares/auth.middleware.js";
+import { requireAuth } from "../../shared/middlewares/auth.middleware.js";
 
 
 const router = Router();

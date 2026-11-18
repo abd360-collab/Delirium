@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
-import { AppError } from "../../errors/AppError.js";
-import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import { ERROR_CODES } from "../../shared/errors/errorCodes.js";
 
 import { RazorpayGateway } from "./razorpay.gateway.js";
 import { razorpayOrderPaidWebhookSchema } from "./payment.schema.js";

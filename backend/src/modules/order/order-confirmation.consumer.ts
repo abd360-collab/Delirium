@@ -1,13 +1,13 @@
-import { logger } from "../../config/logger.js";
+import { logger } from "../../shared/observability/logger.js";
 import { connectRabbitMQConsumer } from "../../infrastructure/messaging/rabbitmq/rabbitmq.js";
 import {
     RABBITMQ_QUEUES,
     RABBITMQ_ROUTING_KEYS,
-} from "../../lib/rabbitmq.constants.js";
+} from "../../infrastructure/messaging/rabbitmq/rabbitmq.constants.js";
 import { paymentSuccessEventSchema } from "../payment/payment.schema.js";
 import { orderService } from "./order.service.js";
-import { moveToDlq, retryOrMoveToDlq } from "../../lib/rabbitmq.consumer-retry.js";
-import { classifyRabbitMQError } from "../../lib/rabbitmq-error-classifier.js";
+import { moveToDlq, retryOrMoveToDlq } from "../../infrastructure/messaging/rabbitmq/rabbitmq.consumer-retry.js";
+import { classifyRabbitMQError } from "../../infrastructure/messaging/rabbitmq/rabbitmq-error-classifier.js";
 
 const PREFETCH_COUNT = 10;
 

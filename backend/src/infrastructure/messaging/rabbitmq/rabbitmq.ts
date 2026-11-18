@@ -7,11 +7,10 @@ import {
     RABBITMQ_EXCHANGES,
     RABBITMQ_QUEUES,
     RABBITMQ_ROUTING_KEYS,
-} from "../../../lib/rabbitmq.constants.js";
+} from "./rabbitmq.constants.js";
 
 import { env } from "../../../config/env.js";
-import { logger } from "../../../config/logger.js";
-
+import { logger } from "../../../shared/observability/logger.js";
 
 // ============================================================
 // Types

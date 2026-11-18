@@ -2,7 +2,7 @@ import "./realtime.types.js";
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
 
-import { verifyAccessToken } from "../../lib/jwt.js";
+import { verifyAccessToken } from "../../shared/security/jwt.js";
 import {
     REALTIME_ROOMS,
 } from "./realtime.constants.js";

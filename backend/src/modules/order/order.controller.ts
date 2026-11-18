@@ -6,9 +6,9 @@ import {
     createOrderSchema,
     updateOrderStatusSchema,
 } from "./order.schema.js";
-import { getRequiredParam } from "../../lib/requestParams.js";
-import { AppError } from "../../errors/AppError.js";
-import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { getRequiredParam } from "../../shared/utils/requestParams.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import { ERROR_CODES } from "../../shared/errors/errorCodes.js";
 
 
 

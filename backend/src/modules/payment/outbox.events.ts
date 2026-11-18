@@ -1,4 +1,4 @@
-import { RABBITMQ_ROUTING_KEYS } from "../../lib/rabbitmq.constants.js";
+import { RABBITMQ_ROUTING_KEYS } from "../../infrastructure/messaging/rabbitmq/rabbitmq.constants.js";
 
 export function getOutboxRoutingKey(
     eventType: string,

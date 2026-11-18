@@ -1,7 +1,7 @@
 import { Router } from "express";
 
-import { requireAuth } from "../../middlewares/auth.middleware.js";
-import { requireRole } from "../../middlewares/authorization.middleware.js";
+import { requireAuth } from "../../shared/middlewares/auth.middleware.js";
+import { requireRole } from "../../shared/middlewares/authorization.middleware.js";
 import {
     getAdminOrders,
     getAdminOrderById,

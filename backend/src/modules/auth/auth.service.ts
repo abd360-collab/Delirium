@@ -1,16 +1,16 @@
 import { randomUUID } from "node:crypto";
 
-import { AppError } from "../../errors/AppError.js";
-import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import { ERROR_CODES } from "../../shared/errors/errorCodes.js";
 
 import {
     generateAccessToken,
     generateRefreshToken,
     getTokenExpiration,
     verifyRefreshToken,
-} from "../../lib/jwt.js";
+} from "../../shared/security/jwt.js";
 
-import { hashToken } from "../../lib/token.js";
+import { hashToken } from "../../shared/security/token.js";
 
 import { authRepository } from "./auth.repository.js";
 

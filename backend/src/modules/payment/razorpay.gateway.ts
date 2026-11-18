@@ -13,8 +13,8 @@ import type {
   VerifyWebhookSignatureInput,
 } from "./payment.gateway.js";
 import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils.js";
-import { AppError } from "../../errors/AppError.js";
-import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import { ERROR_CODES } from "../../shared/errors/errorCodes.js";
 
 export class RazorpayGateway implements PaymentGateway {
   private readonly razorpay: Razorpay;

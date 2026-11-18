@@ -4,7 +4,7 @@ import type {
     NextFunction,
 } from "express";
 
-import { verifyAccessToken } from "../lib/jwt.js";
+import { verifyAccessToken } from "../security/jwt.js";
 import { AppError } from "../errors/AppError.js";
 import { ERROR_CODES } from "../errors/errorCodes.js";
 

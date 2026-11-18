@@ -5,8 +5,8 @@ import crypto from "node:crypto";
 import { paymentRepository } from "../payment/payment.repository.js";
 import { refundRepository } from "../payment/refund.repository.js";
 
-import { AppError } from "../../errors/AppError.js";
-import { ERROR_CODES } from "../../errors/errorCodes.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import { ERROR_CODES } from "../../shared/errors/errorCodes.js";
 
 import { cartRepository } from "../cart/cart.repository.js";
 import { orderRepository } from "./order.repository.js";
@@ -17,7 +17,7 @@ import {
 
 import type { OrderStatus } from "../../generated/prisma/client.js";
 import { outboxRepository } from "../payment/outbox.repository.js";
-import { calculateDistanceKm } from "../../utils/distance.js";
+import { calculateDistanceKm } from "../../shared/utils/distance.js";
 
 export const orderService = {
     async createOrder(
