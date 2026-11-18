@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AuthProvider } from "../../context/AuthContext";
 
@@ -18,6 +18,13 @@ import { CheckoutPage } from "../../features/checkout/pages/CheckoutPage";
 import { OrdersPage } from "../../features/order/pages/OrderPage";
 import { ScrollToTop } from "../../components/ScrollToTop";
 import { ProfilePage } from "../../features/profile/pages/ProfilePage";
+import { AdminDashboardPage } from "../../features/admin/pages/AdminDashboardPage";
+import { AdminOrdersPage } from "../../features/admin/pages/AdminOrdersPage";
+import { AdminInvoicesPage } from "../../features/admin/pages/AdminInvoicesPage";
+import { useAuth } from "../../hooks/useAuth";
+import { RestaurantSettingsPage } from "../../features/admin/pages/RestaurantSettingsPage";
+import { MenuManagementPage } from "../../features/admin/pages/MenuManagementPage";
+
 
 function LoginPage() {
 
@@ -55,13 +62,26 @@ const returnTo =
     );
 }
 
-function AdminDashboardPage() {
-    return <h2>Admin Dashboard</h2>;
-}
-
 function NotFoundPage() {
     return <h2>Page not found</h2>;
 }
+
+
+
+function CustomerHomeRedirect() {
+    const { user, isLoading } = useAuth();
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (user?.role === "ADMIN") {
+        return <Navigate to="/admin" replace />;
+    }
+
+    return <HomePage />;
+}
+
 
 export function AppRouter() {
     return (
@@ -78,10 +98,7 @@ export function AppRouter() {
                     </Route>
 
                     <Route element={<CustomerLayout />}>
-                        <Route
-                            path="/"
-                            element={<HomePage />}
-                        />
+                        <Route path="/" element={<CustomerHomeRedirect />} />
 
                         <Route
                             path="/menu"
@@ -125,6 +142,19 @@ export function AppRouter() {
                                 index
                                 element={<AdminDashboardPage />}
                             />
+
+                            <Route path="orders" element={<AdminOrdersPage />} />
+                            <Route path="invoices" element={<AdminInvoicesPage />} />
+                            <Route
+    path="restaurant"
+    element={<RestaurantSettingsPage />}
+/>
+
+              <Route
+    path="menu"
+    element={<MenuManagementPage />}
+/>
+
                         </Route>
                     </Route>
 

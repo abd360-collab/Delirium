@@ -1,6 +1,5 @@
 import { apiClient } from "../lib/api/client";
-import type { Order } from "../types/order.types";
-
+import type { Order, OrderStatus } from "../types/order.types";
 
 
 type CreateOrderInput = {
@@ -65,4 +64,57 @@ export async function getOrders(): Promise<Order[]> {
         );
 
     return response.data.data.orders;
+}
+
+
+
+interface GetAdminOrdersResponse {
+    success: boolean;
+    data: Order[];
+}
+
+interface GetAdminOrderResponse {
+    success: boolean;
+    data: Order;
+}
+
+export async function getAdminOrders(): Promise<Order[]> {
+    const response =
+        await apiClient.get<GetAdminOrdersResponse>(
+            "/admin/order/",
+        );
+
+    return response.data.data;
+}
+
+export async function getAdminOrder(
+    orderId: string,
+): Promise<Order> {
+    const response =
+        await apiClient.get<GetAdminOrderResponse>(
+            `/admin/order/${orderId}`,
+        );
+
+    return response.data.data;
+}
+
+
+
+
+
+export async function updateAdminOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+): Promise<Order> {
+    const response = await apiClient.patch<{
+        success: boolean;
+        data: {
+            order: Order;
+        };
+    }>(
+        `/admin/order/${orderId}/status`,
+        { status },
+    );
+
+    return response.data.data.order;
 }

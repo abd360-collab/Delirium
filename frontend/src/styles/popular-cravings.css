@@ -1,371 +1,425 @@
+
 .popular-cravings {
     width: min(
-        calc(100% - (var(--page-padding) * 2)),
-        var(--content-width)
+        calc(100% - (var(--page-padding, 2rem) * 2)),
+        var(--content-width, 1200px)
     );
 
-    margin: var(--space-10) auto;
-
-    padding: var(--space-10) 0;
+    margin: var(--space-10, 5rem) auto;
+    padding: var(--space-10, 5rem) 0;
 }
 
-
-/* --------------------------------
-   Header
--------------------------------- */
+/* Header */
 
 .popular-cravings__header {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+    gap: 2rem;
 
-    gap: var(--space-6);
+    margin-bottom: var(--space-7, 2rem);
+}
 
-    margin-bottom: var(--space-7);
+.popular-cravings__heading {
+    min-width: 0;
 }
 
 .popular-cravings__eyebrow {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-3, 0.75rem);
 
-    margin: 0 0 var(--space-4);
+    margin: 0 0 var(--space-4, 1rem);
 
-    color: var(--color-accent-dark);
-
+    color: var(--color-accent-dark, #a94819);
     font-size: 0.68rem;
     font-weight: 850;
-
     letter-spacing: 0.2em;
 }
 
 .popular-cravings__eyebrow::before {
     content: "";
-
-    width: 28px;
+    flex: 0 0 28px;
     height: 2px;
-
-    background: var(--color-accent);
+    background: var(--color-accent, #e96a2c);
 }
 
-.popular-cravings__header h2 {
+.popular-cravings__title {
     margin: 0;
 
-    font-family: var(--font-display);
-
+    font-family: var(--font-display, Georgia, serif);
     font-size: clamp(3.2rem, 5vw, 5.2rem);
     font-weight: 900;
-
-    line-height: 0.86;
+    line-height: 0.9;
     letter-spacing: -0.055em;
 }
 
+.popular-cravings__intro {
+    margin: 1rem 0 0;
 
-/* --------------------------------
-   Full menu link
--------------------------------- */
+    color: var(--color-text-muted, #71645b);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Full menu link */
 
 .popular-cravings__link {
     flex-shrink: 0;
 
     display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
 
-    padding-bottom: 0.35rem;
+    padding: 0 0 0.4rem;
 
-    border-bottom: 1px solid var(--color-text);
+    border-bottom: 1px solid currentColor;
 
-    color: var(--color-text);
-
+    color: var(--color-text, #241510);
     font-size: 0.75rem;
     font-weight: 850;
-
     letter-spacing: 0.04em;
     text-decoration: none;
     text-transform: uppercase;
 
     transition:
-        color var(--duration-fast) var(--ease-standard),
-        border-color var(--duration-fast) var(--ease-standard),
-        transform var(--duration-fast) var(--ease-standard);
+        color 200ms ease,
+        border-color 200ms ease,
+        transform 200ms ease;
 }
 
 .popular-cravings__link:hover {
-    color: var(--color-accent-dark);
-
-    border-color: var(--color-accent-dark);
-
+    color: var(--color-accent-dark, #a94819);
     transform: translateX(3px);
 }
 
+.popular-cravings__link:focus-visible,
+.popular-cravings__empty-link:focus-visible {
+    outline: 3px solid var(--color-accent, #e96a2c);
+    outline-offset: 5px;
+}
 
-/* --------------------------------
-   Grid
--------------------------------- */
+/* Grid */
 
 .popular-cravings__grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(1rem, 2vw, 1.5rem);
 }
 
-
-/* --------------------------------
-   Item
--------------------------------- */
+/* Product link */
 
 .popular-cravings__item {
     position: relative;
-
     min-width: 0;
 
     display: block;
 
     color: inherit;
     text-decoration: none;
+
+    border-radius: 24px;
 }
 
+.popular-cravings__item:focus-visible {
+    outline: 3px solid var(--color-accent, #e96a2c);
+    outline-offset: 5px;
+}
 
-/* --------------------------------
-   Image
--------------------------------- */
+/* Product image */
 
 .popular-cravings__image-wrapper {
     position: relative;
+    isolation: isolate;
+    overflow: hidden;
 
     width: 100%;
     aspect-ratio: 0.88 / 1;
 
-    overflow: hidden;
-
     border-radius: 28px;
-
-    background: var(--color-cream-deep);
-
-    isolation: isolate;
+    background: var(--color-cream-deep, #f0e3d1);
 }
 
-
-/*
-    Small accent corner.
-    This makes the image feel like
-    part of the Delirium design system.
-*/
-
-.popular-cravings__image-wrapper::after {
-    content: "↗";
-
+.popular-cravings__image-placeholder {
     position: absolute;
+    inset: 0;
+    z-index: 0;
 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    background:
+        radial-gradient(
+            circle at 75% 25%,
+            rgba(233, 106, 44, 0.18),
+            transparent 45%
+        ),
+        var(--color-cream-deep, #f0e3d1);
+
+    color: var(--color-ink, #241510);
+}
+
+.popular-cravings__image-placeholder span {
+    font-size: 0.65rem;
+    font-weight: 850;
+    letter-spacing: 0.2em;
+}
+
+.popular-cravings__image-placeholder strong {
+    font-family: var(--font-display, Georgia, serif);
+    font-size: clamp(3rem, 5vw, 5rem);
+    font-weight: 900;
+    line-height: 1;
+    opacity: 0.18;
+}
+
+.popular-cravings__image {
+    position: relative;
+    z-index: 1;
+
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    transition: transform 500ms ease;
+}
+
+.popular-cravings__image-arrow {
+    position: absolute;
     right: 12px;
     bottom: 12px;
-
     z-index: 2;
 
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     border-radius: 50%;
+    background: rgba(255, 248, 233, 0.96);
+    color: var(--color-ink, #241510);
 
-    background: rgba(255, 248, 233, 0.94);
-
-    color: var(--color-ink);
-
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 800;
 
     opacity: 0;
-
     transform: translateY(5px);
 
     transition:
-        opacity var(--duration-normal) var(--ease-standard),
-        transform var(--duration-normal) var(--ease-standard);
+        opacity 250ms ease,
+        transform 250ms ease;
 }
 
-.popular-cravings__image {
-    width: 100%;
-    height: 100%;
-
-    display: block;
-
-    object-fit: cover;
-
-    transition:
-        transform 600ms var(--ease-standard);
-}
-
-.popular-cravings__item:hover
-.popular-cravings__image {
-    transform: scale(1.055);
-}
-
-.popular-cravings__item:hover
-.popular-cravings__image-wrapper::after {
-    opacity: 1;
-
-    transform: translateY(0);
-}
-
-
-/* --------------------------------
-   Item information
--------------------------------- */
+/* Product information */
 
 .popular-cravings__item-info {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    gap: 0.75rem;
 
-    gap: var(--space-3);
-
-    padding: var(--space-4) 0 0;
+    padding: var(--space-4, 1rem) 0 0;
 }
 
 .popular-cravings__item-info h3 {
-    max-width: 210px;
-
+    min-width: 0;
     margin: 0;
 
-    font-family: var(--font-display);
-
-    font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+    font-family: var(--font-display, Georgia, serif);
+    font-size: clamp(1rem, 1.5vw, 1.35rem);
     font-weight: 900;
-
-    line-height: 1.02;
+    line-height: 1.12;
     letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
 
-    transition:
-        color var(--duration-fast) var(--ease-standard);
+    transition: color 200ms ease;
 }
 
-.popular-cravings__item-info span {
+.popular-cravings__price {
     flex-shrink: 0;
-
     margin-top: 0.1rem;
 
-    color: var(--color-accent-dark);
-
+    color: var(--color-accent-dark, #a94819);
     font-size: 0.82rem;
     font-weight: 850;
-
-    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
+/* Hover effects */
 
-/* --------------------------------
-   Subtle item hover
--------------------------------- */
+@media (hover: hover) {
+    .popular-cravings__item:hover
+    .popular-cravings__image {
+        transform: scale(1.055);
+    }
 
-.popular-cravings__item:hover
-.popular-cravings__item-info h3 {
-    color: var(--color-accent-dark);
+    .popular-cravings__item:hover
+    .popular-cravings__image-arrow {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .popular-cravings__item:hover
+    .popular-cravings__item-info h3 {
+        color: var(--color-accent-dark, #a94819);
+    }
 }
 
+.popular-cravings__item:focus-visible
+.popular-cravings__image-arrow {
+    opacity: 1;
+    transform: translateY(0);
+}
 
-/* --------------------------------
-   Tablet
--------------------------------- */
+/* Empty state */
+
+.popular-cravings__empty {
+    min-height: 250px;
+    padding: clamp(1.5rem, 4vw, 3rem);
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+
+    border: 1px solid rgba(36, 21, 16, 0.1);
+    border-radius: 28px;
+
+    background: var(--color-cream-deep, #f0e3d1);
+}
+
+.popular-cravings__empty-mark {
+    color: var(--color-accent-dark, #a94819);
+    font-family: var(--font-display, Georgia, serif);
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+.popular-cravings__empty h3 {
+    margin: 0.75rem 0 0;
+
+    font-family: var(--font-display, Georgia, serif);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    line-height: 1.1;
+}
+
+.popular-cravings__empty p {
+    max-width: 420px;
+    margin: 0.75rem 0 0;
+
+    color: var(--color-text-muted, #71645b);
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.popular-cravings__empty-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    margin-top: 1.25rem;
+
+    color: var(--color-accent-dark, #a94819);
+    font-size: 0.8rem;
+    font-weight: 850;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* Tablet */
 
 @media (max-width: 1000px) {
     .popular-cravings__grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: var(--space-6);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-6, 1.5rem);
     }
 
     .popular-cravings__image-wrapper {
         aspect-ratio: 1 / 0.92;
     }
+
+    .popular-cravings__item-info h3 {
+        font-size: clamp(1.05rem, 2vw, 1.3rem);
+    }
 }
 
-
-/* --------------------------------
-   Mobile
--------------------------------- */
+/* Mobile */
 
 @media (max-width: 600px) {
     .popular-cravings {
         width: min(
             calc(100% - 2rem),
-            var(--content-width)
+            var(--content-width, 1200px)
         );
 
-        margin: var(--space-8) auto;
-
-        padding: var(--space-7) 0;
+        margin: var(--space-8, 3rem) auto;
+        padding: var(--space-7, 2rem) 0;
     }
 
     .popular-cravings__header {
         align-items: flex-start;
-
         flex-direction: column;
+        gap: var(--space-5, 1.25rem);
 
-        gap: var(--space-5);
-
-        margin-bottom: var(--space-6);
+        margin-bottom: var(--space-6, 1.5rem);
     }
 
-    .popular-cravings__header h2 {
-        font-size: clamp(
-            3rem,
-            14vw,
-            4.4rem
-        );
+    .popular-cravings__title {
+        font-size: clamp(3rem, 14vw, 4.4rem);
     }
 
     .popular-cravings__grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: var(--space-4);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-4, 1rem);
     }
 
     .popular-cravings__image-wrapper {
         aspect-ratio: 0.88 / 1;
-
         border-radius: 20px;
     }
 
     .popular-cravings__item-info {
         display: block;
-
-        padding-top: var(--space-3);
+        padding-top: var(--space-3, 0.75rem);
     }
 
     .popular-cravings__item-info h3 {
         font-size: 1rem;
     }
 
-    .popular-cravings__item-info span {
+    .popular-cravings__price {
         display: block;
-
         margin-top: 0.4rem;
     }
 
-    .popular-cravings__image-wrapper::after {
+    .popular-cravings__image-arrow {
         display: none;
     }
 }
 
-
-/* --------------------------------
-   Reduced motion
--------------------------------- */
+/* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
     .popular-cravings__image,
-    .popular-cravings__image-wrapper::after,
+    .popular-cravings__image-arrow,
     .popular-cravings__link,
     .popular-cravings__item-info h3 {
         transition: none;
+    }
+
+    .popular-cravings__item:hover
+    .popular-cravings__image {
+        transform: none;
+    }
+
+    .popular-cravings__link:hover {
+        transform: none;
     }
 }

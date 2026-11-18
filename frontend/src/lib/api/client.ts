@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 import { ApiError } from "./api-error";
@@ -5,9 +6,6 @@ import { getAccessToken } from "../auth/token-store";
 
 export const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
     withCredentials: true,
 });
 
@@ -56,7 +54,6 @@ apiClient.interceptors.response.use(
         );
     },
 );
-
 
 apiClient.interceptors.request.use((config) => {
     const accessToken = getAccessToken();

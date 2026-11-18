@@ -1,4 +1,7 @@
+
 import { Link } from "react-router-dom";
+
+
 
 export function FinalCtaSection() {
     return (
@@ -11,7 +14,10 @@ export function FinalCtaSection() {
                     ONE MORE BITE
                 </p>
 
-                <h2 id="final-cta-title">
+                <h2
+                    id="final-cta-title"
+                    className="final-cta__title"
+                >
                     COME HUNGRY.
                     <br />
                     LEAVE DELIRIOUS.
@@ -26,7 +32,13 @@ export function FinalCtaSection() {
                     to="/menu"
                     className="final-cta__button"
                 >
-                    Explore the Menu
+                    <span>Explore the Menu</span>
+                    <span
+                        className="final-cta__button-arrow"
+                        aria-hidden="true"
+                    >
+                        ↗
+                    </span>
                 </Link>
             </div>
         </section>

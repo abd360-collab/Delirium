@@ -20,3 +20,34 @@ export interface MenuItem {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface CreateCategoryInput {
+    name: string;
+    description?: string;
+    displayOrder: number;
+}
+
+export interface UpdateCategoryInput {
+    name?: string;
+    description?: string;
+    displayOrder?: number;
+    isActive?: boolean;
+}
+
+export interface CreateMenuItemInput {
+    categoryId: string;
+    name: string;
+    description?: string;
+    priceInPaise: number;
+    imageUrl?: string;
+}
+
+export interface UpdateMenuItemInput {
+    categoryId?: string;
+    name?: string;
+    description?: string;
+    priceInPaise?: number;
+    imageUrl?: string;
+    isActive?: boolean;
+    isAvailable?: boolean;
+}

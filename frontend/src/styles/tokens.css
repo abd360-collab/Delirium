@@ -116,4 +116,78 @@
 
     --ease-standard:
         cubic-bezier(0.2, 0.8, 0.2, 1);
+
+
+
+   
+    /* --------------------------------
+       Typography scale
+    -------------------------------- */
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 2rem;
+    --text-4xl: clamp(2.5rem, 5vw, 4.5rem);
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.15;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.7;
+
+    /* --------------------------------
+       Semantic feedback colors
+    -------------------------------- */
+
+    --color-success: #217a45;
+    --color-success-soft: #e9f6ed;
+
+    --color-danger: #b42318;
+    --color-danger-soft: #fef0ee;
+
+    --color-warning: #95600b;
+    --color-warning-soft: #fff4d6;
+
+    --color-info: #245b91;
+    --color-info-soft: #edf5ff;
+
+    /* --------------------------------
+       Interactive states
+    -------------------------------- */
+
+    --color-focus: #a94e0a;
+    --focus-ring: 0 0 0 3px rgba(242, 140, 40, 0.3);
+
+    --color-disabled: #a79b92;
+    --color-disabled-background: #eee8e1;
+
+    /* --------------------------------
+       Layout and controls
+    -------------------------------- */
+
+    --content-width-narrow: 760px;
+    --content-width-wide: 1440px;
+
+    --header-height: 76px;
+    --control-height-sm: 36px;
+    --control-height-md: 44px;
+    --control-height-lg: 52px;
+
+    /* --------------------------------
+       Layering
+    -------------------------------- */
+
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-overlay: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+
 }

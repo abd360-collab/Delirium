@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import {
     MapContainer,
@@ -22,6 +22,8 @@ type DeliveryLocationMapProps = {
         longitude: number;
     } | null;
     onLocationSelect: (location: DeliveryLocation) => void;
+    onLocationSelectionStart?: () => void;
+    onLocationResolvingChange?: (isResolving: boolean) => void;
 };
 
 type Coordinates = {
@@ -44,6 +46,7 @@ const markerIcon = L.divIcon({
 async function reverseGeocode(
     latitude: number,
     longitude: number,
+    signal: AbortSignal,
 ): Promise<string> {
     const params = new URLSearchParams({
         format: "jsonv2",
@@ -58,6 +61,7 @@ async function reverseGeocode(
             headers: {
                 Accept: "application/json",
             },
+            signal,
         },
     );
 
@@ -95,7 +99,10 @@ function MapCenterUpdater({ position }: { position: Coordinates }) {
     const map = useMap();
 
     useEffect(() => {
-        map.flyTo([position.latitude, position.longitude], 16);
+        map.flyTo([position.latitude, position.longitude], 16, {
+            animate: true,
+            duration: 0.5,
+        });
     }, [map, position.latitude, position.longitude]);
 
     return null;
@@ -104,82 +111,107 @@ function MapCenterUpdater({ position }: { position: Coordinates }) {
 export default function DeliveryLocationMap({
     initialPosition,
     onLocationSelect,
+    onLocationSelectionStart,
+    onLocationResolvingChange,
 }: DeliveryLocationMapProps) {
     const [position, setPosition] = useState<Coordinates>(
         initialPosition ?? RESTAURANT_POSITION,
     );
-
-
-    
-useEffect(() => {
-    // When editing a saved address, use its coordinates instead of GPS.
-    if (initialPosition) return;
-
-    if (!navigator.geolocation) {
-        setError(
-            "Location detection is unavailable. Search for an address or select a point on the map.",
-        );
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (result) => {
-            const currentPosition: Coordinates = {
-                latitude: result.coords.latitude,
-                longitude: result.coords.longitude,
-            };
-
-            setPosition(currentPosition);
-            void selectPosition(currentPosition);
-        },
-        (locationError) => {
-            if (locationError.code === locationError.PERMISSION_DENIED) {
-                setError(
-                    "Location permission was denied. You can still search or select a point on the map.",
-                );
-            } else {
-                setError(
-                    "Couldn't detect your current location. You can still search or select a point on the map.",
-                );
-            }
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 20000,
-            maximumAge: 0,
-        },
-    );
-}, [initialPosition?.latitude, initialPosition?.longitude]);
-
-
-
-
     const [searchQuery, setSearchQuery] = useState("");
     const [address, setAddress] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [isResolvingAddress, setIsResolvingAddress] = useState(false);
     const [error, setError] = useState("");
 
-   
+    const isGeolocationAvailable =
+        typeof navigator !== "undefined" && "geolocation" in navigator;
 
-    async function selectPosition(nextPosition: Coordinates) {
+    const mountedRef = useRef(false);
+    const requestIdRef = useRef(0);
+    const abortControllerRef = useRef<AbortController | null>(null);
+
+    const onLocationSelectRef = useRef(onLocationSelect);
+    const onLocationSelectionStartRef = useRef(onLocationSelectionStart);
+    const onLocationResolvingChangeRef = useRef(onLocationResolvingChange);
+
+    useEffect(() => {
+        onLocationSelectRef.current = onLocationSelect;
+        onLocationSelectionStartRef.current = onLocationSelectionStart;
+        onLocationResolvingChangeRef.current = onLocationResolvingChange;
+    }, [
+        onLocationSelect,
+        onLocationSelectionStart,
+        onLocationResolvingChange,
+    ]);
+
+    useEffect(() => {
+        mountedRef.current = true;
+
+        return () => {
+            mountedRef.current = false;
+            requestIdRef.current += 1;
+            abortControllerRef.current?.abort();
+        };
+    }, []);
+
+    const selectPosition = useCallback(async (nextPosition: Coordinates) => {
+        if (
+            !Number.isFinite(nextPosition.latitude) ||
+            !Number.isFinite(nextPosition.longitude) ||
+            nextPosition.latitude < -90 ||
+            nextPosition.latitude > 90 ||
+            nextPosition.longitude < -180 ||
+            nextPosition.longitude > 180
+        ) {
+            setError("The selected map coordinates are invalid.");
+            return;
+        }
+
+        const requestId = ++requestIdRef.current;
+
+        abortControllerRef.current?.abort();
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
         setPosition(nextPosition);
+        setAddress("");
         setError("");
         setIsResolvingAddress(true);
+
+        // Notify the parent immediately so old coordinates cannot be saved.
+        onLocationSelectionStartRef.current?.();
+        onLocationResolvingChangeRef.current?.(true);
 
         try {
             const readableAddress = await reverseGeocode(
                 nextPosition.latitude,
                 nextPosition.longitude,
+                controller.signal,
             );
+
+            if (
+                !mountedRef.current ||
+                requestId !== requestIdRef.current
+            ) {
+                return;
+            }
 
             setAddress(readableAddress);
 
-            onLocationSelect({
+            onLocationSelectRef.current({
                 ...nextPosition,
                 address: readableAddress,
             });
         } catch (err) {
+            if (
+                !mountedRef.current ||
+                requestId !== requestIdRef.current ||
+                (err instanceof Error && err.name === "AbortError")
+            ) {
+                return;
+            }
+
             setAddress("");
             setError(
                 err instanceof Error
@@ -187,9 +219,70 @@ useEffect(() => {
                     : "Could not find this address. Please try again.",
             );
         } finally {
-            setIsResolvingAddress(false);
+            if (
+                mountedRef.current &&
+                requestId === requestIdRef.current
+            ) {
+                setIsResolvingAddress(false);
+                abortControllerRef.current = null;
+                onLocationResolvingChangeRef.current?.(false);
+            }
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        if (initialPosition) {
+            return;
+        }
+
+        if (!isGeolocationAvailable) {
+            return;
+        }
+
+        let cancelled = false;
+
+        navigator.geolocation.getCurrentPosition(
+            (result) => {
+                if (cancelled || !mountedRef.current) {
+                    return;
+                }
+
+                void selectPosition({
+                    latitude: result.coords.latitude,
+                    longitude: result.coords.longitude,
+                });
+            },
+            (locationError) => {
+                if (cancelled || !mountedRef.current) {
+                    return;
+                }
+
+                if (locationError.code === locationError.PERMISSION_DENIED) {
+                    setError(
+                        "Location permission was denied. You can still search or select a point on the map.",
+                    );
+                } else {
+                    setError(
+                        "Couldn't detect your current location. You can still search or select a point on the map.",
+                    );
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 20000,
+                maximumAge: 0,
+            },
+        );
+
+        return () => {
+            cancelled = true;
+        };
+    }, [
+        initialPosition?.latitude,
+        initialPosition?.longitude,
+        isGeolocationAvailable,
+        selectPosition,
+    ]);
 
     async function handleSearch() {
         const query = searchQuery.trim();
@@ -232,60 +325,69 @@ useEffect(() => {
                 );
             }
 
-            const resultPosition: Coordinates = {
-                latitude: Number(results[0].lat),
-                longitude: Number(results[0].lon),
-            };
+            const latitude = Number(results[0].lat);
+            const longitude = Number(results[0].lon);
 
-            await selectPosition(resultPosition);
+            if (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            ) {
+                throw new Error(
+                    "The search returned invalid coordinates. Try another place.",
+                );
+            }
+
+            await selectPosition({ latitude, longitude });
         } catch (err) {
+            if (!mountedRef.current) {
+                return;
+            }
+
             setError(
                 err instanceof Error
                     ? err.message
                     : "Could not search for that address.",
             );
         } finally {
-            setIsSearching(false);
+            if (mountedRef.current) {
+                setIsSearching(false);
+            }
         }
     }
 
     return (
-        <section className="delivery-map">
+        <section className="delivery-map" aria-labelledby="delivery-map-title">
             <div className="delivery-map__heading">
-                <h3>Choose your delivery location</h3>
+                <h3 id="delivery-map-title">Choose your delivery location</h3>
                 <p>
                     Search for a place, or click the map to position the pin
                     where you want your order delivered.
                 </p>
             </div>
 
-          
+            <div className="delivery-map__search">
+                <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search area, street, landmark..."
+                    aria-label="Search delivery location"
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            void handleSearch();
+                        }
+                    }}
+                />
 
-<div className="delivery-map__search">
-    <input
-        type="search"
-        value={searchQuery}
-        onChange={(event) => setSearchQuery(event.target.value)}
-        placeholder="Search area, street, landmark..."
-        aria-label="Search delivery location"
-        onKeyDown={(event) => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                void handleSearch();
-            }
-        }}
-    />
-
-    <button
-        type="button"
-        disabled={isSearching || isResolvingAddress}
-        onClick={() => void handleSearch()}
-    >
-        {isSearching ? "Searching..." : "Search"}
-    </button>
-</div>
-
-
+                <button
+                    type="button"
+                    disabled={isSearching || isResolvingAddress}
+                    onClick={() => void handleSearch()}
+                >
+                    {isSearching ? "Searching..." : "Search"}
+                </button>
+            </div>
 
             <div className="delivery-map__canvas">
                 <MapContainer
@@ -340,6 +442,13 @@ useEffect(() => {
                     </>
                 ) : (
                     <p>Select a point on the map to find its address.</p>
+                )}
+
+                {!isGeolocationAvailable && !initialPosition && (
+                    <p>
+                        Location detection is unavailable. You can still search
+                        or select a point on the map.
+                    </p>
                 )}
 
                 {error && (

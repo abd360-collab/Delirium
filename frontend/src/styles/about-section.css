@@ -1,79 +1,213 @@
+/* --------------------------------
+   About section
+-------------------------------- */
+
 .about-section {
+    box-sizing: border-box;
+
     width: min(
-        calc(100% - (var(--page-padding) * 2)),
-        var(--content-width)
+        calc(100% - (var(--page-padding, 1.25rem) * 2)),
+        var(--content-width, 1200px)
     );
 
-    margin: var(--space-10) auto;
+    margin: clamp(4rem, 8vw, 7rem) auto;
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
 
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-    gap: var(--space-9);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: end;
+    gap: clamp(2rem, 5vw, 5rem);
 
-    padding: var(--space-8) 0;
-    border-top: var(--border-thin);
-    border-bottom: var(--border-thin);
+    border-top: var(--border-thin, 1px solid rgba(36, 21, 16, 0.14));
+    border-bottom: var(--border-thin, 1px solid rgba(36, 21, 16, 0.14));
 }
 
 .about-section__intro {
+    min-width: 0;
     max-width: 760px;
 }
 
 .about-section__eyebrow {
-    margin: 0 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.22em;
+    margin: 0 0 1.5rem;
+
+    color: var(--color-accent-dark, #d96f12);
+
+    font-size: 0.67rem;
+    font-weight: 850;
+    letter-spacing: 0.18em;
+    line-height: 1.6;
 }
 
-.about-section__intro h2 {
+.about-section__eyebrow-line {
+    display: inline-block;
+
+    width: 28px;
+    height: 2px;
+    flex: 0 0 28px;
+
+    border-radius: 999px;
+    background: var(--color-accent, #f28c28);
+}
+
+.about-section__title {
     margin: 0;
 
-    max-width: 720px;
+    color: var(--color-ink, #241510);
 
-    font-family: var(--font-display);
-    font-size: clamp(2.6rem, 4.2vw, 4.5rem);
-    line-height: 0.92;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display, Georgia, serif);
+    font-size: clamp(2.6rem, 4.15vw, 4.5rem);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.06em;
+
+    text-wrap: balance;
 }
+
+.about-section__title span {
+    color: var(--color-accent-dark, #d96f12);
+}
+
+
+/* --------------------------------
+   Supporting copy
+-------------------------------- */
 
 .about-section__content {
-    align-self: end;
+    position: relative;
 
+    min-width: 0;
     max-width: 420px;
-    padding-bottom: var(--space-2);
+    padding-bottom: 0.25rem;
 }
 
-.about-section__content p {
-    margin: 0 0 var(--space-5);
+.about-section__description {
+    margin: 0 0 1.75rem;
 
-    color: var(--color-text-muted);
-    font-size: 1rem;
-    line-height: 1.8;
+    color: var(--color-text-muted, #705b50);
+
+    font-size: 0.98rem;
+    line-height: 1.9;
 }
 
-.about-section__content p:last-child {
-    margin-bottom: 0;
+.about-section__closing {
+    margin: 0;
 
-    color: var(--color-text);
-    font-weight: 800;
+    color: var(--color-ink, #241510);
+
+    font-family: var(--font-display, Georgia, serif);
+    font-size: clamp(1.35rem, 2vw, 1.7rem);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.025em;
 }
+
+.about-section__asterisk {
+    display: block;
+
+    margin-top: 1.25rem;
+
+    color: var(--color-accent, #f28c28);
+
+    font-family: var(--font-display, Georgia, serif);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 0.8;
+}
+
+
+/* --------------------------------
+   Tablet
+-------------------------------- */
+
+@media (max-width: 900px) {
+    .about-section {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+        gap: 2rem;
+    }
+
+    .about-section__title {
+        font-size: clamp(2.5rem, 5vw, 3.7rem);
+    }
+
+    .about-section__description {
+        font-size: 0.94rem;
+    }
+}
+
+
+/* --------------------------------
+   Mobile
+-------------------------------- */
 
 @media (max-width: 760px) {
     .about-section {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        gap: 1.75rem;
 
-        margin: var(--space-8) auto;
-        padding: var(--space-7) 0;
+        margin: 3.5rem auto;
+        padding: 2.5rem 0;
     }
 
-  .about-section__intro h2 {
-    font-size: clamp(2.5rem, 11vw, 3.8rem);
-}
+    .about-section__eyebrow {
+        margin-bottom: 1.25rem;
+
+        font-size: 0.62rem;
+        letter-spacing: 0.15em;
+    }
+
+    .about-section__title {
+        font-size: clamp(2.35rem, 8.5vw, 3.8rem);
+        line-height: 1;
+        letter-spacing: -0.055em;
+    }
 
     .about-section__content {
-        align-self: auto;
+        max-width: 540px;
+    }
+
+    .about-section__description {
+        margin-bottom: 1.35rem;
+
+        font-size: 0.94rem;
+        line-height: 1.8;
+    }
+
+    .about-section__closing {
+        font-size: 1.45rem;
+    }
+
+    .about-section__asterisk {
+        margin-top: 1rem;
+    }
+}
+
+
+/* --------------------------------
+   Very small phones
+-------------------------------- */
+
+@media (max-width: 380px) {
+    .about-section {
+        width: calc(100% - 1.5rem);
+        gap: 1.5rem;
+    }
+
+    .about-section__title {
+        font-size: clamp(2.1rem, 8.5vw, 2.5rem);
+    }
+
+    .about-section__eyebrow {
+        gap: 0.5rem;
+        font-size: 0.58rem;
+    }
+
+    .about-section__eyebrow-line {
+        width: 20px;
+        flex-basis: 20px;
     }
 }

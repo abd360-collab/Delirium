@@ -17,6 +17,8 @@
 @import "./styles/login.css";
 @import "./styles/profile-page.css";
 @import "./styles/DeliveryLocationMap.css";
+@import "./styles/admin.css";
+@import "./styles/home-page.css";
 
 * {
     box-sizing: border-box;
