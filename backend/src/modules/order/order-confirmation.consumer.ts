@@ -1,5 +1,5 @@
 import { logger } from "../../config/logger.js";
-import { connectRabbitMQConsumer } from "../../config/rabbitmq.js";
+import { connectRabbitMQConsumer } from "../../infrastructure/messaging/rabbitmq/rabbitmq.js";
 import {
     RABBITMQ_QUEUES,
     RABBITMQ_ROUTING_KEYS,

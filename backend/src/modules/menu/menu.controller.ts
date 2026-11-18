@@ -1,3 +1,4 @@
+
 import type { Request, Response } from "express";
 
 import {
@@ -8,7 +9,11 @@ import {
 } from "./menu.schema.js";
 
 import { menuService } from "./menu.service.js";
+import { imageService } from "./image.service.js";
+
 import { getRequiredParam } from "../../lib/requestParams.js";
+import { AppError } from "../../errors/AppError.js";
+import { ERROR_CODES } from "../../errors/errorCodes.js";
 
 
 export async function createCategory(
@@ -21,9 +26,7 @@ export async function createCategory(
 
     return res.status(201).json({
         success: true,
-        data: {
-            category,
-        },
+        data: { category },
     });
 }
 
@@ -32,20 +35,13 @@ export async function getCategory(
     req: Request,
     res: Response,
 ) {
-    const categoryId = getRequiredParam(
-        req.params.id,
-        "id",
-    );
+    const categoryId = getRequiredParam(req.params.id, "id");
 
-    const category = await menuService.getCategoryById(
-        categoryId,
-    );
+    const category = await menuService.getCategoryById(categoryId);
 
     return res.status(200).json({
         success: true,
-        data: {
-            category,
-        },
+        data: { category },
     });
 }
 
@@ -58,9 +54,7 @@ export async function listCategories(
 
     return res.status(200).json({
         success: true,
-        data: {
-            categories,
-        },
+        data: { categories },
     });
 }
 
@@ -71,10 +65,7 @@ export async function updateCategory(
 ) {
     const input = updateCategorySchema.parse(req.body);
 
-    const categoryId = getRequiredParam(
-        req.params.id,
-        "id",
-    );
+    const categoryId = getRequiredParam(req.params.id, "id");
 
     const category = await menuService.updateCategory(
         categoryId,
@@ -83,9 +74,7 @@ export async function updateCategory(
 
     return res.status(200).json({
         success: true,
-        data: {
-            category,
-        },
+        data: { category },
     });
 }
 
@@ -94,10 +83,7 @@ export async function deleteCategory(
     req: Request,
     res: Response,
 ) {
-    const categoryId = getRequiredParam(
-        req.params.id,
-        "id",
-    );
+    const categoryId = getRequiredParam(req.params.id, "id");
 
     await menuService.deleteCategory(categoryId);
 
@@ -115,9 +101,7 @@ export async function createMenuItem(
 
     return res.status(201).json({
         success: true,
-        data: {
-            menuItem,
-        },
+        data: { menuItem },
     });
 }
 
@@ -132,9 +116,7 @@ export async function getMenuItem(
 
     return res.status(200).json({
         success: true,
-        data: {
-            menuItem,
-        },
+        data: { menuItem },
     });
 }
 
@@ -147,9 +129,7 @@ export async function listMenuItems(
 
     return res.status(200).json({
         success: true,
-        data: {
-            menuItems,
-        },
+        data: { menuItems },
     });
 }
 
@@ -167,9 +147,7 @@ export async function updateMenuItem(
 
     return res.status(200).json({
         success: true,
-        data: {
-            menuItem,
-        },
+        data: { menuItem },
     });
 }
 
@@ -178,7 +156,40 @@ export async function deleteMenuItem(
     req: Request,
     res: Response,
 ) {
-    await menuService.deleteMenuItem(getRequiredParam(req.params.id, "id"));
+    await menuService.deleteMenuItem(
+        getRequiredParam(req.params.id, "id"),
+    );
 
     return res.status(204).send();
+}
+
+
+// =========================
+// Image Upload
+// =========================
+
+export async function uploadMenuImage(
+    req: Request,
+    res: Response,
+) {
+    if (!req.file) {
+        throw new AppError(
+            ERROR_CODES.VALIDATION_ERROR,
+            "Please select an image to upload.",
+            400,
+        );
+    }
+
+    const result = await imageService.uploadMenuImage({
+        buffer: req.file.buffer,
+        mimeType: req.file.mimetype,
+    });
+
+    return res.status(201).json({
+        success: true,
+        data: {
+            imageUrl: result.imageUrl,
+            publicId: result.publicId,
+        },
+    });
 }

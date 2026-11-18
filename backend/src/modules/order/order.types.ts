@@ -8,14 +8,18 @@ export interface CreateOrderItemData {
 }
 
 
+
 export interface CreateOrderData {
     userId: string;
     phoneNumber: string;
     deliveryAddress: string;
+    deliveryLatitude: number;
+    deliveryLongitude: number;
     subtotalInPaise: number;
     totalInPaise: number;
     items: CreateOrderItemData[];
 }
+
 
 
 export interface UpdateOrderStatusData {

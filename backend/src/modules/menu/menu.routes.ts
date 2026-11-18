@@ -11,9 +11,11 @@ import {
     listMenuItems,
     updateMenuItem,
     deleteMenuItem,
+    uploadMenuImage,
 } from "./menu.controller.js";
 import { requireAuth } from "../../middlewares/auth.middleware.js";
 import { requireRole } from "../../middlewares/authorization.middleware.js";
+import { uploadSingleImage } from "../../middlewares/upload.middleware.js";
 
 
 const router = Router();
@@ -99,6 +101,14 @@ router.delete(
     requireAuth,
     requireRole("ADMIN"),
     deleteMenuItem,
+);
+
+router.post(
+    "/upload-image",
+    requireAuth,
+    requireRole("ADMIN"),
+    uploadSingleImage,
+    uploadMenuImage,
 );
 
 

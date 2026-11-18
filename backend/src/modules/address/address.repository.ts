@@ -1,5 +1,5 @@
 
-import { prisma } from "../../config/prisma.js";
+import { prisma } from "../../infrastructure/database/prisma.js";
 
 export const addressRepository = {
     findAllByUserId(userId: string) {

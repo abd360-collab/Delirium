@@ -1,20 +1,24 @@
-import { createServer } from "node:http";
 
+import { createServer } from "node:http";
 import app from "./app.js";
 import { env } from "./config/env.js";
+import { logger } from "./config/logger.js";
+import {
+    connectRabbitMQ,
+    registerRabbitMQRecoveryHandler,
+    setupRabbitMQTopology,
+} from "./infrastructure/messaging/rabbitmq/rabbitmq.js";
+
+import { restaurantService } from "./modules/restaurant/restaurant.service.js";
 
 import { startRefundConsumer } from "./modules/payment/refund.consumer.js";
 import {
     startOutboxWorker,
     stopOutboxWorker,
 } from "./modules/payment/outbox.worker.js";
-import {
-    startOrderConfirmationConsumer,
-} from "./modules/order/order-confirmation.consumer.js";
+import { startOrderConfirmationConsumer } from "./modules/order/order-confirmation.consumer.js";
 import { startRefundReconciliationWorker } from "./modules/payment/refund.reconciliation.worker.js";
 import { createRealtimeServer } from "./modules/realtime/realtime.server.js";
-import { logger } from "./config/logger.js";
-import { connectRabbitMQ, registerRabbitMQRecoveryHandler, setupRabbitMQTopology } from "./config/rabbitmq.js";
 import { startOrderRealtimeConsumer } from "./modules/order/order-realtime.consumer.js";
 
 let server: ReturnType<typeof createServer>;
@@ -35,20 +39,23 @@ process.on("SIGINT", () => shutdown("SIGINT"));
 
 async function startServer() {
     try {
-        const httpServer = createServer(app);
+        // Ensure restaurant configuration exists before starting the application.
+        await restaurantService.initializeRestaurant();
 
+        logger.info("Restaurant configuration initialized");
+
+        const httpServer = createServer(app);
         const io = createRealtimeServer(httpServer);
 
         const rabbitMQChannel = await connectRabbitMQ();
+
         await setupRabbitMQTopology(rabbitMQChannel);
 
-        registerRabbitMQRecoveryHandler(
-            async () => {
-                await startOrderConfirmationConsumer();
-                await startRefundConsumer();
-                await startOrderRealtimeConsumer(io);
-            },
-        );
+        registerRabbitMQRecoveryHandler(async () => {
+            await startOrderConfirmationConsumer();
+            await startRefundConsumer();
+            await startOrderRealtimeConsumer(io);
+        });
 
         await startOrderConfirmationConsumer();
         await startRefundConsumer();
@@ -68,11 +75,7 @@ async function startServer() {
             void startOutboxWorker();
         });
     } catch (error) {
-        logger.fatal(
-            { err: error },
-            "Failed to start server",
-        );
-
+        logger.fatal({ err: error }, "Failed to start server");
         process.exit(1);
     }
 }

@@ -1,16 +1,12 @@
+
 import type { Server } from "socket.io";
 
 import { logger } from "../../config/logger.js";
-import { connectRabbitMQConsumer } from "../../config/rabbitmq.js";
-import {
-    RABBITMQ_QUEUES,
-} from "../../lib/rabbitmq.constants.js";
-import {
-    orderStatusChangedEventSchema,
-} from "../realtime/realtime.schema.js";
-import {
-    REALTIME_ROOMS,
-} from "../realtime/realtime.constants.js";
+import { connectRabbitMQConsumer } from "../../infrastructure/messaging/rabbitmq/rabbitmq.js";
+import { RABBITMQ_QUEUES } from "../../lib/rabbitmq.constants.js";
+import { orderStatusChangedEventSchema } from "../realtime/realtime.schema.js";
+import { REALTIME_ROOMS } from "../realtime/realtime.constants.js";
+import { orderRepository } from "./order.repository.js";
 
 const PREFETCH_COUNT = 10;
 
@@ -29,7 +25,7 @@ export async function startOrderRealtimeConsumer(
             }
 
             try {
-                const rawPayload = JSON.parse(
+                const rawPayload = JSON.parse(         
                     message.content.toString("utf-8"),
                 );
 
@@ -40,74 +36,75 @@ export async function startOrderRealtimeConsumer(
 
                 if (!parsed.success) {
                     logger.error(
-                        {
-                            error: parsed.error,
-                        },
+                        { error: parsed.error },
                         "Invalid order status changed event",
                     );
 
-                    channel.nack(
-                        message,
-                        false,
-                        false,
-                    );
-
+                    channel.nack(message, false, false);
                     return;
                 }
 
                 const event = parsed.data;
 
-                io.to(
-                    REALTIME_ROOMS.order(event.orderId),
-                ).emit(
+                // Notify the customer tracking this order.
+                io.to(REALTIME_ROOMS.order(event.orderId)).emit(
                     "order:status_changed",
                     event,
                 );
 
                 if (event.newStatus === "CONFIRMED") {
-                    io.to(
-                        REALTIME_ROOMS.ADMINS,
-                    ).emit(
-                        "order:status_changed",
-                        event,
-                    );
+                    // Load the persisted order with admin-facing details.
+                    const order =
+                        await orderRepository.findOrderForAdminById(
+                            event.orderId,
+                        );
+
+                    if (order) {
+                        // Send the complete order to connected admins.
+                        io.to(REALTIME_ROOMS.ADMINS).emit(
+                            "order:new",
+                            order,
+                        );
+                    } else {
+                        logger.warn(
+                            { orderId: event.orderId },
+                            "Confirmed order not found for admin notification",
+                        );
+                    }
                 }
+
+                // Admins also receive subsequent status changes.
+                io.to(REALTIME_ROOMS.ADMINS).emit(
+                    "order:status_changed",
+                    event,
+                );
 
                 channel.ack(message);
 
                 logger.info(
                     {
                         orderId: event.orderId,
-                        previousStatus:
-                            event.previousStatus,
-                        newStatus:
-                            event.newStatus,
+                        previousStatus: event.previousStatus,
+                        newStatus: event.newStatus,
                     },
-                    "Order status realtime event delivered",
+                    "Order realtime event delivered",
                 );
             } catch (error) {
                 logger.error(
                     {
                         error,
-                        messageId:
-                            message.properties.messageId,
+                        messageId: message.properties.messageId,
                     },
                     "Failed to process order realtime message",
                 );
 
-                channel.nack(
-                    message,
-                    false,
-                    false,
-                );
+                channel.nack(message, false, false);
             }
         },
     );
 
     logger.info(
-        {
-            prefetchCount: PREFETCH_COUNT,
-        },
+        { prefetchCount: PREFETCH_COUNT },
         "Order realtime consumer started",
     );
 }

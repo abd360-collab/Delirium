@@ -1,5 +1,5 @@
 
-import { prisma } from "../../config/prisma.js";
+import { prisma } from "../../infrastructure/database/prisma.js";
 import { AppError } from "../../errors/AppError.js";
 import { ERROR_CODES } from "../../errors/errorCodes.js";
 

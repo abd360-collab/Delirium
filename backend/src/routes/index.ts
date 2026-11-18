@@ -7,6 +7,8 @@ import orderRoutes from "../modules/order/order.routes.js";
 import adminOrderRoutes from "../modules/order/admin-order.routes.js";
 import paymentRoutes from "../modules/payment/payment.routes.js";
 import addressRoutes from "../modules/address/address.routes.js";
+import restaurantRoutes from "../modules/restaurant/restaurant.routes.js";
+
 
 const router = Router();
 
@@ -23,5 +25,7 @@ router.use("/order", orderRoutes);
 router.use("/admin/order", adminOrderRoutes);
 
 router.use("/payment", paymentRoutes);
+
+router.use("/restaurant", restaurantRoutes);
 
 export default router;

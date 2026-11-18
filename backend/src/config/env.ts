@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import type { StringValue } from "ms";
 import { z } from "zod";
@@ -32,14 +33,6 @@ const envSchema = z.object({
 
     FRONTEND_URL: z.string().url(),
 
-    
-    RESTAURANT_LATITUDE: z.coerce.number().min(-90).max(90),
-
-    RESTAURANT_LONGITUDE: z.coerce.number().min(-180).max(180),
-
-    DELIVERY_RADIUS_KM: z.coerce.number().positive().default(5),
-
-
     JWT_ACCESS_TOKEN_EXPIRY: z
         .string()
         .min(1)
@@ -55,6 +48,12 @@ const envSchema = z.object({
     RAZORPAY_KEY_SECRET: z.string().min(1),
 
     RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
+
+    CLOUDINARY_CLOUD_NAME: z.string().min(1),
+
+CLOUDINARY_API_KEY: z.string().min(1),
+
+CLOUDINARY_API_SECRET: z.string().min(1),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
