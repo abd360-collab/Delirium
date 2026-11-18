@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "npx prisma migrate dev --name init",
     "db:generate": "npx prisma generate",
-    "db:seed": "tsx prisma/seeds.ts"
+    "db:seed": "tsx prisma/seeds.ts",
+    "test": "node --env-file=.env.test ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "node --env-file=.env.test ./node_modules/vitest/vitest.mjs"
   },
   "keywords": [],
   "author": "",
@@ -46,9 +48,12 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.3.0",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.6",
+    "@types/supertest": "^7.2.1",
     "prisma": "^7.10.0",
+    "supertest": "^7.3.2",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
   }
 }
